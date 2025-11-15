@@ -4,167 +4,536 @@
   <meta charset="UTF-8">
   <title>애니 / 만화 리스트 (Firebase 실시간 동기화)</title>
   <style>
+    :root {
+      --bg: #0f172a;
+      --card: #020617;
+      --accent: #38bdf8;
+      --accent-soft: #0f172a;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --danger: #f97373;
+      --watching: #facc15;
+      --done: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: sans-serif;
-      padding: 16px;
-    }
-    h1 {
-      margin-bottom: 12px;
-    }
-    .input-row {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b, #020617);
+      color: var(--text);
       display: flex;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      backdrop-filter: blur(12px);
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 8px;
+    }
+
+    .title-block h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .title-block p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      white-space: nowrap;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 12px;
+    }
+
+    .input-row,
+    .toolbar {
+      display: flex;
       flex-wrap: wrap;
+      gap: 8px;
+      width: 100%;
     }
+
     input, select, button {
-      padding: 4px 8px;
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      outline: none;
     }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+    }
+
+    button {
+      cursor: pointer;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #38bdf8, #6366f1);
+      border: none;
+      color: white;
+      padding-inline: 14px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    button.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    button.danger {
+      background: transparent;
+      border: 1px solid rgba(248, 113, 113, 0.6);
+      color: #fecaca;
+    }
+
+    button:hover {
+      filter: brightness(1.05);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .toolbar {
+      margin-top: 4px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .toolbar label {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .toolbar input {
+      min-width: 150px;
+    }
+
+    .toolbar select {
+      min-width: 120px;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
+      margin-top: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 13px;
     }
+
+    thead {
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.7));
+    }
+
     th, td {
-      border: 1px solid #ccc;
-      padding: 4px 8px;
+      padding: 6px 8px;
       text-align: left;
     }
-    tr.seen {
-      background-color: #b3ffff;   /* O일 때 */
+
+    th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
     }
-    tr.not-seen {
-      background-color: #ff8080;   /* X일 때 */
+
+    tbody tr {
+      border-bottom: 1px solid rgba(15, 23, 42, 0.8);
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    tbody tr:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.5);
+    }
+
+    .status-done {
+      background: linear-gradient(90deg, rgba(34, 197, 94, 0.16), transparent);
+    }
+
+    .status-watching {
+      background: linear-gradient(90deg, rgba(250, 204, 21, 0.18), transparent);
+    }
+
+    .status-not {
+      background: linear-gradient(90deg, rgba(248, 113, 113, 0.18), transparent);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid transparent;
+    }
+
+    .status-pill.done {
+      border-color: rgba(34, 197, 94, 0.6);
+      color: #bbf7d0;
+    }
+
+    .status-pill.watching {
+      border-color: rgba(250, 204, 21, 0.6);
+      color: #fef9c3;
+    }
+
+    .status-pill.not {
+      border-color: rgba(248, 113, 113, 0.6);
+      color: #fee2e2;
+    }
+
+    .status-pill span.icon {
+      font-size: 12px;
+    }
+
+    .empty {
+      padding: 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        padding: 14px;
+      }
+      .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      th:nth-child(2),
+      td:nth-child(2) {
+        display: none; /* 에피소드 열 숨김 (모바일) */
+      }
     }
   </style>
 </head>
 <body>
-  <h1>애니 / 만화 리스트 (Firebase 실시간)</h1>
+  <div class="app">
+    <div class="app-header">
+      <div class="title-block">
+        <h1>애니 / 만화 리스트</h1>
+        <p>Firebase Firestore와 실시간으로 동기화되는 개인 리스트</p>
+      </div>
+      <div class="badge">실시간 동기화 · O / △ / X 상태 관리</div>
+    </div>
 
-  <div class="input-row">
-    <input id="title" placeholder="이름">
-    <input id="episode" placeholder="화 (예: 12화)">
-    <select id="seen">
-      <option value="O">O (다 봄)</option>
-      <option value="X">X (안 봄)</option>
-    </select>
-    <input id="type" placeholder="만화 편 / 애니 등">
-    <button onclick="addItem()">추가</button>
-    <button onclick="clearAll()">전체 삭제</button>
+    <div class="controls">
+      <div class="input-row">
+        <input id="title" placeholder="작품 이름">
+        <input id="episode" placeholder="화 (예: 12화)">
+        <select id="seen">
+          <option value="O">O · 다 봄</option>
+          <option value="W">△ · 보는 중</option>
+          <option value="X">X · 안 봄</option>
+        </select>
+        <input id="type" placeholder="메모 (만화/애니/기타)">
+        <button onclick="addItem()">+ 추가</button>
+        <button class="danger" onclick="clearAll()">전체 삭제</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <label for="search">검색</label>
+          <input id="search" placeholder="제목 검색">
+        </div>
+        <div class="toolbar-group">
+          <label for="sort">정렬</label>
+          <select id="sort">
+            <option value="createdDesc">최근 추가순</option>
+            <option value="titleAsc">이름순 (가나다)</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <label for="filter">상태</label>
+          <select id="filter">
+            <option value="ALL">전체</option>
+            <option value="O">O · 다 봄</option>
+            <option value="W">△ · 보는 중</option>
+            <option value="X">X · 안 봄</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>이름</th>
+          <th>화</th>
+          <th>상태</th>
+          <th>메모</th>
+          <th>관리</th>
+        </tr>
+      </thead>
+      <tbody id="list-body"></tbody>
+    </table>
+    <div id="empty" class="empty" style="display:none;">데이터가 없습니다. 위에서 작품을 추가해보세요.</div>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>이름</th>
-        <th>화</th>
-        <th>다 봤는지</th>
-        <th>만화 편</th>
-        <th>삭제</th>
-      </tr>
-    </thead>
-    <tbody id="list-body"></tbody>
-  </table>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      onSnapshot,
+      query,
+      orderBy,
+      doc,
+      updateDoc,
+      deleteDoc,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  doc,
-  updateDoc,
-  deleteDoc,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+    // 네 Firebase 프로젝트 설정
+    const firebaseConfig = {
+      apiKey: "AIzaSyDpbP8aBRqOQtLNLDbtrly49ozPon4SQaWE",
+      authDomain: "anime-list-85c9e.firebaseapp.com",
+      projectId: "anime-list-85c9e",
+      storageBucket: "anime-list-85c9e.firebasestorage.app",
+      messagingSenderId: "397442929562",
+      appId: "1:397442929562:web:1b5e3e90cbbfa8a573d8e51"
+    };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDpbP8aBRqOQtLNLDbtrly49ozPon4SQaWE",
-  authDomain: "anime-list-85c9e.firebaseapp.com",
-  projectId: "anime-list-85c9e",
-  storageBucket: "anime-list-85c9e.firebasestorage.app",
-  messagingSenderId: "397442929562",
-  appId: "1:397442929562:web:1b5e3e90cbbfa8a573d8e51"
-};
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const itemsCol = collection(db, "animeItems");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const itemsCol = collection(db, "animeItems");
+    let items = [];
+    let sortMode = "createdDesc"; // createdDesc | titleAsc
+    let filterStatus = "ALL";     // ALL | O | W | X
+    let searchQuery = "";
 
-let items = [];
+    // createdAt 기준으로 가져오되, 화면에서 다시 정렬
+    const q = query(itemsCol, orderBy("createdAt", "asc"));
+    onSnapshot(q, (snapshot) => {
+      items = [];
+      snapshot.forEach((docSnap) => {
+        items.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      render();
+    });
 
-const q = query(itemsCol, orderBy("createdAt", "asc"));
-onSnapshot(q, (snapshot) => {
-  items = [];
-  snapshot.forEach((docSnap) => {
-    items.push({ id: docSnap.id, ...docSnap.data() });
-  });
-  render();
-});
+    // input/셀렉트 이벤트 연결
+    const searchInput = document.getElementById("search");
+    const sortSelect = document.getElementById("sort");
+    const filterSelect = document.getElementById("filter");
 
-window.addItem = async function () {
-  const title = document.getElementById("title").value.trim();
-  if (!title) return alert("이름을 입력해주세요!");
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      render();
+    });
 
-  const episode = document.getElementById("episode").value.trim();
-  const seen = document.getElementById("seen").value;
-  const type = document.getElementById("type").value.trim();
+    sortSelect.addEventListener("change", (e) => {
+      sortMode = e.target.value;
+      render();
+    });
 
-  await addDoc(itemsCol, {
-    title,
-    episode,
-    seen,
-    type,
-    createdAt: Date.now()
-  });
+    filterSelect.addEventListener("change", (e) => {
+      filterStatus = e.target.value;
+      render();
+    });
 
-  document.getElementById("title").value = "";
-  document.getElementById("episode").value = "";
-  document.getElementById("type").value = "";
-};
+    // 항목 추가
+    window.addItem = async function () {
+      const title = document.getElementById("title").value.trim();
+      const episode = document.getElementById("episode").value.trim();
+      const seen = document.getElementById("seen").value; // O / W / X
+      const type = document.getElementById("type").value.trim();
 
-window.toggleSeen = async function (id, value) {
-  await updateDoc(doc(db, "animeItems", id), { seen: value });
-};
+      if (!title) {
+        alert("작품 이름을 입력해주세요!");
+        return;
+      }
 
-window.deleteItem = async function (id) {
-  if (!confirm("삭제할까요?")) return;
-  await deleteDoc(doc(db, "animeItems", id));
-};
+      await addDoc(itemsCol, {
+        title,
+        episode,
+        seen,
+        type,
+        createdAt: Date.now() // 숫자 timestamp로 저장
+      });
 
-window.clearAll = async function () {
-  if (!confirm("전체 삭제할까요?")) return;
-  const snap = await getDocs(itemsCol);
-  const tasks = snap.docs.map((d) => deleteDoc(d.ref));
-  await Promise.all(tasks);
-};
+      document.getElementById("title").value = "";
+      document.getElementById("episode").value = "";
+      document.getElementById("type").value = "";
+    };
 
-function render() {
-  const tbody = document.getElementById("list-body");
-  tbody.innerHTML = "";
+    // 상태(O/W/X) 변경
+    window.toggleSeen = async function (id, value) {
+      await updateDoc(doc(db, "animeItems", id), { seen: value });
+    };
 
-  items.forEach((item) => {
-    const tr = document.createElement("tr");
-    tr.className = item.seen === "O" ? "seen" : "not-seen";
+    // 항목 삭제
+    window.deleteItem = async function (id) {
+      if (!confirm("이 항목을 삭제할까요?")) return;
+      await deleteDoc(doc(db, "animeItems", id));
+    };
 
-    tr.innerHTML = `
-      <td>${item.title}</td>
-      <td>${item.episode ?? ""}</td>
-      <td>
-        <select onchange="toggleSeen('${item.id}', this.value)">
-          <option value="O" ${item.seen === "O" ? "selected" : ""}>O</option>
-          <option value="X" ${item.seen === "X" ? "selected" : ""}>X</option>
-        </select>
-      </td>
-      <td>${item.type ?? ""}</td>
-      <td><button onclick="deleteItem('${item.id}')">삭제</button></td>
-    `;
+    // 전체 삭제
+    window.clearAll = async function () {
+      if (!confirm("정말 전체 삭제할까요?")) return;
+      const snap = await getDocs(itemsCol);
+      const tasks = snap.docs.map((d) => deleteDoc(d.ref));
+      await Promise.all(tasks);
+    };
 
-    tbody.appendChild(tr);
-  });
-}
-</script>
+    // createdAt 정규화 (기존 SERVER_TIMESTAMP + 숫자 둘 다 지원)
+    function getCreatedAtMs(item) {
+      const v = item.createdAt;
+      if (!v) return 0;
+      if (typeof v === "number") return v;
+      if (v.toMillis) return v.toMillis();
+      return 0;
+    }
+
+    function normalizeSeen(item) {
+      // 기존 데이터는 O/X만 있을 수 있으니 기본값 처리
+      const v = (item.seen || "X").toUpperCase();
+      if (v === "O" || v === "W" || v === "X") return v;
+      return "X";
+    }
+
+    // 화면 렌더링
+    function render() {
+      const tbody = document.getElementById("list-body");
+      const emptyEl = document.getElementById("empty");
+      tbody.innerHTML = "";
+
+      let display = items.map((item) => ({
+        ...item,
+        seen: normalizeSeen(item)
+      }));
+
+      // 검색 필터
+      if (searchQuery) {
+        display = display.filter((item) =>
+          (item.title || "").toLowerCase().includes(searchQuery)
+        );
+      }
+
+      // 상태 필터
+      if (filterStatus !== "ALL") {
+        display = display.filter((item) => normalizeSeen(item) === filterStatus);
+      }
+
+      // 정렬
+      display.sort((a, b) => {
+        if (sortMode === "titleAsc") {
+          return (a.title || "").localeCompare(b.title || "", "ko");
+        } else { // createdDesc
+          return getCreatedAtMs(b) - getCreatedAtMs(a);
+        }
+      });
+
+      if (display.length === 0) {
+        emptyEl.style.display = "block";
+        return;
+      } else {
+        emptyEl.style.display = "none";
+      }
+
+      display.forEach((item) => {
+        const status = normalizeSeen(item);
+        const tr = document.createElement("tr");
+
+        let rowClass = "status-not";
+        let pillClass = "status-pill not";
+        let pillLabel = "X · 안 봄";
+        let pillIcon = "✖";
+
+        if (status === "O") {
+          rowClass = "status-done";
+          pillClass = "status-pill done";
+          pillLabel = "O · 다 봄";
+          pillIcon = "✓";
+        } else if (status === "W") {
+          rowClass = "status-watching";
+          pillClass = "status-pill watching";
+          pillLabel = "△ · 보는 중";
+          pillIcon = "△";
+        }
+
+        tr.className = rowClass;
+
+        tr.innerHTML = `
+          <td>${item.title ?? ""}</td>
+          <td>${item.episode ?? ""}</td>
+          <td>
+            <div class="${pillClass}">
+              <span class="icon">${pillIcon}</span>
+              <span>${pillLabel}</span>
+            </div>
+            <div style="margin-top:4px;">
+              <select onchange="toggleSeen('${item.id}', this.value)">
+                <option value="O" ${status === "O" ? "selected" : ""}>O · 다 봄</option>
+                <option value="W" ${status === "W" ? "selected" : ""}>△ · 보는 중</option>
+                <option value="X" ${status === "X" ? "selected" : ""}>X · 안 봄</option>
+              </select>
+            </div>
+          </td>
+          <td>${item.type ?? ""}</td>
+          <td>
+            <button class="secondary" onclick="deleteItem('${item.id}')">삭제</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
 </body>
 </html>
