@@ -2,13 +2,12 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>애니 / 만화 리스트 (Firebase 실시간 동기화)</title>
+  <title>애니 / 만화 리스트 (썸네일 + Firebase 실시간)</title>
   <style>
     :root {
-      --bg: #0f172a;
+      --bg: #020617;
       --card: #020617;
       --accent: #38bdf8;
-      --accent-soft: #0f172a;
       --text: #e5e7eb;
       --muted: #9ca3af;
       --border: #1f2937;
@@ -17,9 +16,7 @@
       --done: #22c55e;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -34,12 +31,12 @@
 
     .app {
       width: 100%;
-      max-width: 900px;
-      background: rgba(15, 23, 42, 0.95);
+      max-width: 1000px;
+      background: rgba(15, 23, 42, 0.96);
       border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      border: 1px solid rgba(148, 163, 184, 0.25);
       box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
-      padding: 20px;
+      padding: 18px;
       backdrop-filter: blur(12px);
     }
 
@@ -47,13 +44,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
       gap: 8px;
+      margin-bottom: 14px;
     }
 
     .title-block h1 {
-      font-size: 20px;
       margin: 0;
+      font-size: 20px;
     }
 
     .title-block p {
@@ -64,26 +61,26 @@
 
     .badge {
       font-size: 11px;
-      padding: 4px 8px;
+      padding: 4px 10px;
       border-radius: 999px;
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
       border: 1px solid rgba(56, 189, 248, 0.5);
+      color: var(--accent);
       white-space: nowrap;
     }
 
     .controls {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
     }
 
     .input-row,
     .toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
       width: 100%;
     }
 
@@ -92,7 +89,7 @@
       padding: 6px 8px;
       border-radius: 8px;
       border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.98);
       color: var(--text);
       outline: none;
     }
@@ -114,6 +111,7 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      white-space: nowrap;
     }
 
     button.secondary {
@@ -128,16 +126,11 @@
       color: #fecaca;
     }
 
-    button:hover {
-      filter: brightness(1.05);
-    }
-
-    button:active {
-      transform: translateY(1px);
-    }
+    button:hover { filter: brightness(1.05); }
+    button:active { transform: translateY(1px); }
 
     .toolbar {
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .toolbar-group {
@@ -152,111 +145,150 @@
       white-space: nowrap;
     }
 
-    .toolbar input {
-      min-width: 150px;
-    }
+    .toolbar input { min-width: 140px; }
+    .toolbar select { min-width: 120px; }
 
-    .toolbar select {
-      min-width: 120px;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 10px;
       margin-top: 10px;
-      background: rgba(15, 23, 42, 0.85);
-      border-radius: 12px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.97);
+      border-radius: 14px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
       overflow: hidden;
-      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      min-height: 270px;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.7);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
     }
 
-    thead {
-      background: linear-gradient(90deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.7));
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
+      border-color: rgba(56, 189, 248, 0.6);
     }
 
-    th, td {
-      padding: 6px 8px;
-      text-align: left;
+    .thumb-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      background: radial-gradient(circle at top, #1d2436, #020617);
+      overflow: hidden;
     }
 
-    th {
+    .thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .thumb-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: rgba(148, 163, 184, 0.5);
+    }
+
+    .status-chip {
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      padding: 3px 8px;
+      border-radius: 999px;
       font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-    }
-
-    tbody tr {
-      border-bottom: 1px solid rgba(15, 23, 42, 0.8);
-      transition: background 0.15s ease, transform 0.05s ease;
-    }
-
-    tbody tr:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.5);
-    }
-
-    .status-done {
-      background: linear-gradient(90deg, rgba(34, 197, 94, 0.16), transparent);
-    }
-
-    .status-watching {
-      background: linear-gradient(90deg, rgba(250, 204, 21, 0.18), transparent);
-    }
-
-    .status-not {
-      background: linear-gradient(90deg, rgba(248, 113, 113, 0.18), transparent);
-    }
-
-    .status-pill {
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      color: #020617;
+      background: rgba(248, 250, 252, 0.94);
+    }
+
+    .status-chip.done { background: rgba(34, 197, 94, 0.95); color: #022c22; }
+    .status-chip.watching { background: rgba(250, 204, 21, 0.95); color: #422006; }
+    .status-chip.not { background: rgba(248, 113, 113, 0.95); color: #450a0a; }
+
+    .card-body {
+      padding: 8px 9px 9px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 6px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .card-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .status-select-row {
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-select-row select {
+      flex: 1;
+    }
+
+    .pill {
+      font-size: 11px;
       padding: 2px 8px;
       border-radius: 999px;
-      font-size: 11px;
-      border: 1px solid transparent;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--muted);
     }
 
-    .status-pill.done {
-      border-color: rgba(34, 197, 94, 0.6);
-      color: #bbf7d0;
-    }
-
-    .status-pill.watching {
-      border-color: rgba(250, 204, 21, 0.6);
-      color: #fef9c3;
-    }
-
-    .status-pill.not {
-      border-color: rgba(248, 113, 113, 0.6);
-      color: #fee2e2;
-    }
-
-    .status-pill span.icon {
+    .memo {
       font-size: 12px;
+      color: var(--text);
+      margin-top: 4px;
+      min-height: 32px;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .small-btn {
+      font-size: 11px;
+      padding: 3px 8px;
     }
 
     .empty {
-      padding: 16px;
+      margin-top: 12px;
+      padding: 14px;
       text-align: center;
-      color: var(--muted);
       font-size: 13px;
+      color: var(--muted);
+      border-radius: 10px;
+      border: 1px dashed rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.8);
     }
 
     @media (max-width: 640px) {
-      .app {
-        padding: 14px;
-      }
-      .app-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      th:nth-child(2),
-      td:nth-child(2) {
-        display: none; /* 에피소드 열 숨김 (모바일) */
-      }
+      .app { padding: 14px; }
+      .app-header { flex-direction: column; align-items: flex-start; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     }
   </style>
 </head>
@@ -265,9 +297,9 @@
     <div class="app-header">
       <div class="title-block">
         <h1>애니 / 만화 리스트</h1>
-        <p>Firebase Firestore와 실시간으로 동기화되는 개인 리스트</p>
+        <p>Firebase + 자동 썸네일로 관리하는 나만의 리스트</p>
       </div>
-      <div class="badge">실시간 동기화 · O / △ / X 상태 관리</div>
+      <div class="badge">실시간 동기화 · 썸네일 자동 가져오기</div>
     </div>
 
     <div class="controls">
@@ -308,18 +340,7 @@
       </div>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>이름</th>
-          <th>화</th>
-          <th>상태</th>
-          <th>메모</th>
-          <th>관리</th>
-        </tr>
-      </thead>
-      <tbody id="list-body"></tbody>
-    </table>
+    <div id="grid" class="grid"></div>
     <div id="empty" class="empty" style="display:none;">데이터가 없습니다. 위에서 작품을 추가해보세요.</div>
   </div>
 
@@ -353,11 +374,14 @@
     const itemsCol = collection(db, "animeItems");
 
     let items = [];
-    let sortMode = "createdDesc"; // createdDesc | titleAsc
-    let filterStatus = "ALL";     // ALL | O | W | X
+    let sortMode = "createdDesc";
+    let filterStatus = "ALL";
     let searchQuery = "";
 
-    // createdAt 기준으로 가져오되, 화면에서 다시 정렬
+    // 제목별 썸네일 캐시
+    const IMAGE_CACHE = {};
+
+    // Firestore 실시간 구독
     const q = query(itemsCol, orderBy("createdAt", "asc"));
     onSnapshot(q, (snapshot) => {
       items = [];
@@ -367,7 +391,7 @@
       render();
     });
 
-    // input/셀렉트 이벤트 연결
+    // 입력/필터 이벤트 연결
     const searchInput = document.getElementById("search");
     const sortSelect = document.getElementById("sort");
     const filterSelect = document.getElementById("filter");
@@ -391,7 +415,7 @@
     window.addItem = async function () {
       const title = document.getElementById("title").value.trim();
       const episode = document.getElementById("episode").value.trim();
-      const seen = document.getElementById("seen").value; // O / W / X
+      const seen = document.getElementById("seen").value;
       const type = document.getElementById("type").value.trim();
 
       if (!title) {
@@ -404,7 +428,7 @@
         episode,
         seen,
         type,
-        createdAt: Date.now() // 숫자 timestamp로 저장
+        createdAt: Date.now()
       });
 
       document.getElementById("title").value = "";
@@ -412,12 +436,12 @@
       document.getElementById("type").value = "";
     };
 
-    // 상태(O/W/X) 변경
+    // 상태 변경
     window.toggleSeen = async function (id, value) {
       await updateDoc(doc(db, "animeItems", id), { seen: value });
     };
 
-    // 항목 삭제
+    // 삭제
     window.deleteItem = async function (id) {
       if (!confirm("이 항목을 삭제할까요?")) return;
       await deleteDoc(doc(db, "animeItems", id));
@@ -431,7 +455,7 @@
       await Promise.all(tasks);
     };
 
-    // createdAt 정규화 (기존 SERVER_TIMESTAMP + 숫자 둘 다 지원)
+    // createdAt 숫자/타임스탬프 둘 다 지원
     function getCreatedAtMs(item) {
       const v = item.createdAt;
       if (!v) return 0;
@@ -441,40 +465,74 @@
     }
 
     function normalizeSeen(item) {
-      // 기존 데이터는 O/X만 있을 수 있으니 기본값 처리
       const v = (item.seen || "X").toUpperCase();
       if (v === "O" || v === "W" || v === "X") return v;
       return "X";
     }
 
-    // 화면 렌더링
+    // 썸네일 가져오기
+    async function fetchThumbnail(item) {
+      const title = (item.title || "").trim();
+      if (!title) return null;
+
+      // 캐시 먼저 확인
+      if (IMAGE_CACHE[title]) return IMAGE_CACHE[title];
+
+      // 문서에 이미 저장된 경우
+      if (item.imageUrl) {
+        IMAGE_CACHE[title] = item.imageUrl;
+        return item.imageUrl;
+      }
+
+      try {
+        const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        const img = data?.data?.[0]?.images?.jpg?.image_url;
+        IMAGE_CACHE[title] = img || null;
+
+        if (img) {
+          // Firestore에 저장해 두면 다음에 바로 사용 가능
+          try {
+            await updateDoc(doc(db, "animeItems", item.id), { imageUrl: img });
+          } catch (err) {
+            // 권한 문제 등은 무시하고 넘어감
+          }
+        }
+        return img || null;
+      } catch (e) {
+        console.warn("썸네일 가져오기 실패:", title, e);
+        IMAGE_CACHE[title] = null;
+        return null;
+      }
+    }
+
+    // 렌더링
     function render() {
-      const tbody = document.getElementById("list-body");
+      const grid = document.getElementById("grid");
       const emptyEl = document.getElementById("empty");
-      tbody.innerHTML = "";
+      grid.innerHTML = "";
 
       let display = items.map((item) => ({
         ...item,
         seen: normalizeSeen(item)
       }));
 
-      // 검색 필터
       if (searchQuery) {
         display = display.filter((item) =>
           (item.title || "").toLowerCase().includes(searchQuery)
         );
       }
 
-      // 상태 필터
       if (filterStatus !== "ALL") {
         display = display.filter((item) => normalizeSeen(item) === filterStatus);
       }
 
-      // 정렬
       display.sort((a, b) => {
         if (sortMode === "titleAsc") {
           return (a.title || "").localeCompare(b.title || "", "ko");
-        } else { // createdDesc
+        } else {
           return getCreatedAtMs(b) - getCreatedAtMs(a);
         }
       });
@@ -488,50 +546,109 @@
 
       display.forEach((item) => {
         const status = normalizeSeen(item);
-        const tr = document.createElement("tr");
 
-        let rowClass = "status-not";
-        let pillClass = "status-pill not";
-        let pillLabel = "X · 안 봄";
-        let pillIcon = "✖";
+        const card = document.createElement("div");
+        card.className = "card";
 
-        if (status === "O") {
-          rowClass = "status-done";
-          pillClass = "status-pill done";
-          pillLabel = "O · 다 봄";
-          pillIcon = "✓";
-        } else if (status === "W") {
-          rowClass = "status-watching";
-          pillClass = "status-pill watching";
-          pillLabel = "△ · 보는 중";
-          pillIcon = "△";
+        const thumbWrapper = document.createElement("div");
+        thumbWrapper.className = "thumb-wrapper";
+
+        const img = document.createElement("img");
+        img.className = "thumb";
+        img.style.display = "none";
+
+        const placeholder = document.createElement("div");
+        placeholder.className = "thumb-placeholder";
+        placeholder.textContent = "🎬";
+
+        thumbWrapper.appendChild(img);
+        thumbWrapper.appendChild(placeholder);
+
+        const chip = document.createElement("div");
+        chip.className = "status-chip";
+        if (status === "O") chip.classList.add("done");
+        else if (status === "W") chip.classList.add("watching");
+        else chip.classList.add("not");
+
+        chip.textContent =
+          status === "O" ? "다 봄" :
+          status === "W" ? "보는 중" : "안 봄";
+
+        thumbWrapper.appendChild(chip);
+
+        const body = document.createElement("div");
+        body.className = "card-body";
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "card-title";
+        titleEl.textContent = item.title || "";
+
+        const metaEl = document.createElement("div");
+        metaEl.className = "card-meta";
+        metaEl.textContent = item.episode ? `${item.episode}` : "화 정보 없음";
+
+        const statusRow = document.createElement("div");
+        statusRow.className = "status-select-row";
+        const pill = document.createElement("div");
+        pill.className = "pill";
+        pill.textContent = "상태 변경";
+
+        const select = document.createElement("select");
+        select.innerHTML = `
+          <option value="O" ${status === "O" ? "selected" : ""}>O · 다 봄</option>
+          <option value="W" ${status === "W" ? "selected" : ""}>△ · 보는 중</option>
+          <option value="X" ${status === "X" ? "selected" : ""}>X · 안 봄</option>
+        `;
+        select.onchange = (e) => toggleSeen(item.id, e.target.value);
+
+        statusRow.appendChild(pill);
+        statusRow.appendChild(select);
+
+        const memo = document.createElement("div");
+        memo.className = "memo";
+        memo.textContent = item.type || "";
+
+        const footer = document.createElement("div");
+        footer.className = "card-footer";
+
+        const timeEl = document.createElement("div");
+        timeEl.className = "card-meta";
+        const d = getCreatedAtMs(item);
+        if (d) {
+          const date = new Date(d);
+          timeEl.textContent = date.toLocaleString("ko-KR");
+        } else {
+          timeEl.textContent = "";
         }
 
-        tr.className = rowClass;
+        const delBtn = document.createElement("button");
+        delBtn.className = "secondary small-btn";
+        delBtn.textContent = "삭제";
+        delBtn.onclick = () => deleteItem(item.id);
 
-        tr.innerHTML = `
-          <td>${item.title ?? ""}</td>
-          <td>${item.episode ?? ""}</td>
-          <td>
-            <div class="${pillClass}">
-              <span class="icon">${pillIcon}</span>
-              <span>${pillLabel}</span>
-            </div>
-            <div style="margin-top:4px;">
-              <select onchange="toggleSeen('${item.id}', this.value)">
-                <option value="O" ${status === "O" ? "selected" : ""}>O · 다 봄</option>
-                <option value="W" ${status === "W" ? "selected" : ""}>△ · 보는 중</option>
-                <option value="X" ${status === "X" ? "selected" : ""}>X · 안 봄</option>
-              </select>
-            </div>
-          </td>
-          <td>${item.type ?? ""}</td>
-          <td>
-            <button class="secondary" onclick="deleteItem('${item.id}')">삭제</button>
-          </td>
-        `;
+        footer.appendChild(timeEl);
+        footer.appendChild(delBtn);
 
-        tbody.appendChild(tr);
+        body.appendChild(titleEl);
+        body.appendChild(metaEl);
+        body.appendChild(statusRow);
+        body.appendChild(memo);
+        body.appendChild(footer);
+
+        card.appendChild(thumbWrapper);
+        card.appendChild(body);
+        grid.appendChild(card);
+
+        // 썸네일 비동기 로딩
+        fetchThumbnail(item).then((url) => {
+          if (url) {
+            img.src = url;
+            img.onload = () => {
+              img.style.display = "block";
+              placeholder.style.display = "none";
+            };
+          }
+        });
       });
     }
   </script>
