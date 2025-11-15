@@ -1,95 +1,114 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>애니리스트</title>
+
+  <!-- iPhone / iPad 홈 화면 아이콘 -->
+  <link rel="apple-touch-icon" href="icon_512.png" />
+  <link rel="icon" type="image/png" href="icon_512.png" />
+
   <style>
-    :root {
-      --bg: #020617;
-      --card: #020617;
+    :root[data-theme="light"] {
+      --bg: #f3f4f6;
+      --text: #111827;
+      --subtext: #4b5563;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
       --accent: #38bdf8;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --border: #1f2937;
       --danger: #f97373;
-      --watching: #facc15;
-      --done: #22c55e;
+      --status-done: #d4f6d4;
+      --status-watching: #fff4c4;
+      --status-not: #ffd4d4;
+      --chip-text: #111827;
     }
 
-    * { box-sizing: border-box; }
+    :root[data-theme="dark"] {
+      --bg: #020617;
+      --text: #e5e7eb;
+      --subtext: #9ca3af;
+      --card-bg: #020617;
+      --border: #1f2937;
+      --accent: #38bdf8;
+      --danger: #f97373;
+      --status-done: #14532d;
+      --status-watching: #78350f;
+      --status-not: #7f1d1d;
+      --chip-text: #f9fafb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
 
     body {
-      margin: 0;
-      min-height: 100vh;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1e293b, #020617);
+      padding: 16px;
+      margin: 0;
+      background: var(--bg);
       color: var(--text);
-      display: flex;
-      justify-content: center;
-      padding: 24px 12px;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 20px;
     }
 
     .app {
-      width: 100%;
-      max-width: 1000px;
-      background: rgba(15, 23, 42, 0.96);
-      border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
-      padding: 18px;
-      backdrop-filter: blur(12px);
+      max-width: 900px;
+      margin: 0 auto;
     }
 
     .app-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 12px;
       gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .title-block h1 {
-      margin: 0;
-      font-size: 20px;
+      flex-wrap: wrap;
     }
 
     .title-block p {
-      margin: 2px 0 0;
+      margin: 0;
       font-size: 12px;
-      color: var(--muted);
+      color: var(--subtext);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
     }
 
     .badge {
       font-size: 11px;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 999px;
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.5);
-      color: var(--accent);
-      white-space: nowrap;
+      border: 1px solid var(--border);
+      color: var(--subtext);
     }
 
     .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
-    .input-row,
-    .toolbar {
+    .input-row {
       display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
       flex-wrap: wrap;
-      gap: 6px;
-      width: 100%;
     }
 
-    input, select, button {
+    input,
+    select,
+    button {
       font-size: 13px;
-      padding: 6px 8px;
-      border-radius: 8px;
+      padding: 5px 8px;
+      border-radius: 6px;
       border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.98);
+      background: var(--card-bg);
       color: var(--text);
       outline: none;
     }
@@ -97,251 +116,179 @@
     input:focus,
     select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
     }
 
     button {
       cursor: pointer;
       border-radius: 999px;
-      background: linear-gradient(135deg, #38bdf8, #6366f1);
       border: none;
-      color: white;
-      padding-inline: 14px;
+      background: linear-gradient(135deg, #38bdf8, #6366f1);
+      color: #f9fafb;
+      padding-inline: 12px;
       font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
       white-space: nowrap;
     }
 
     button.secondary {
       background: transparent;
       border: 1px solid var(--border);
-      color: var(--muted);
+      color: var(--subtext);
     }
 
     button.danger {
-      background: transparent;
-      border: 1px solid rgba(248, 113, 113, 0.6);
-      color: #fecaca;
+      background: #b91c1c;
     }
 
-    button:hover { filter: brightness(1.05); }
-    button:active { transform: translateY(1px); }
-
-    .toolbar {
-      margin-top: 2px;
-    }
-
-    .toolbar-group {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .toolbar label {
+    button.small-btn {
+      padding: 3px 8px;
       font-size: 11px;
-      color: var(--muted);
-      white-space: nowrap;
     }
-
-    .toolbar input { min-width: 140px; }
-    .toolbar select { min-width: 120px; }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 10px;
-      margin-top: 10px;
     }
 
     .card {
-      background: rgba(15, 23, 42, 0.97);
-      border-radius: 14px;
-      border: 1px solid rgba(31, 41, 55, 0.9);
-      overflow: hidden;
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
       display: flex;
       flex-direction: column;
-      min-height: 270px;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.7);
-      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
-      border-color: rgba(56, 189, 248, 0.6);
-    }
-
-    .thumb-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 3 / 4;
-      background: radial-gradient(circle at top, #1d2436, #020617);
-      overflow: hidden;
-    }
-
-    .thumb {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .thumb-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-      color: rgba(148, 163, 184, 0.5);
-    }
-
-    .status-chip {
-      position: absolute;
-      left: 8px;
-      bottom: 8px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: #020617;
-      background: rgba(248, 250, 252, 0.94);
-    }
-
-    .status-chip.done { background: rgba(34, 197, 94, 0.95); color: #022c22; }
-    .status-chip.watching { background: rgba(250, 204, 21, 0.95); color: #422006; }
-    .status-chip.not { background: rgba(248, 113, 113, 0.95); color: #450a0a; }
-
-    .card-body {
-      padding: 8px 9px 9px;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
       gap: 6px;
     }
 
-    .card-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-
-    .card-meta {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .status-select-row {
-      margin-top: 4px;
+    .card-header {
       display: flex;
-      align-items: center;
+      justify-content: space-between;
+      align-items: flex-start;
       gap: 4px;
     }
 
-    .status-select-row select {
-      flex: 1;
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .card-meta {
+      font-size: 12px;
+      color: var(--subtext);
+    }
+
+    .status-chip {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--chip-text);
+      white-space: nowrap;
+    }
+
+    .status-chip.done {
+      background: var(--status-done);
+    }
+
+    .status-chip.watching {
+      background: var(--status-watching);
+    }
+
+    .status-chip.not {
+      background: var(--status-not);
+    }
+
+    .status-select-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
     }
 
     .pill {
-      font-size: 11px;
-      padding: 2px 8px;
+      padding: 2px 6px;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      color: var(--muted);
+      background: rgba(148, 163, 184, 0.2);
+      font-size: 11px;
+      color: var(--subtext);
     }
 
     .memo {
-      font-size: 12px;
-      color: var(--text);
-      margin-top: 4px;
-      min-height: 32px;
+      font-size: 13px;
+      min-height: 20px;
     }
 
     .card-footer {
-      margin-top: auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 4px;
+      margin-top: 4px;
     }
 
-    .small-btn {
-      font-size: 11px;
-      padding: 3px 8px;
+    .theme-select {
+      font-size: 12px;
+      padding: 4px 8px;
     }
 
     .empty {
-      margin-top: 12px;
-      padding: 14px;
-      text-align: center;
+      margin-top: 16px;
       font-size: 13px;
-      color: var(--muted);
-      border-radius: 10px;
-      border: 1px dashed rgba(148, 163, 184, 0.5);
-      background: rgba(15, 23, 42, 0.8);
-    }
-
-    @media (max-width: 640px) {
-      .app { padding: 14px; }
-      .app-header { flex-direction: column; align-items: flex-start; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+      color: var(--subtext);
     }
   </style>
 </head>
+
 <body>
   <div class="app">
     <div class="app-header">
       <div class="title-block">
         <h1>애니리스트</h1>
-        <p>Firebase + 자동 썸네일로 관리하는 나만의 리스트</p>
+        <p>Firebase로 동기화되는 나만의 시청 리스트</p>
       </div>
-      <div class="badge">실시간 동기화 · 썸네일 자동 가져오기</div>
+      <div class="header-actions">
+        <select id="themeSelect" class="theme-select">
+          <option value="light">라이트 모드</option>
+          <option value="dark">다크 모드</option>
+        </select>
+        <button class="danger" onclick="clearAll()">전체 삭제</button>
+      </div>
     </div>
 
     <div class="controls">
       <div class="input-row">
-        <input id="title" placeholder="작품 이름">
-        <input id="episode" placeholder="화 (예: 12화)">
+        <input id="title" placeholder="작품 이름" />
+        <input id="episode" placeholder="화 (예: 12화)" />
         <select id="seen">
           <option value="O">O · 다 봄</option>
           <option value="W">△ · 보는 중</option>
           <option value="X">X · 안 봄</option>
         </select>
-        <input id="type" placeholder="메모 (만화/애니/기타)">
+        <input id="type" placeholder="메모 (만화/애니/기타)" />
         <button onclick="addItem()">+ 추가</button>
-        <button class="danger" onclick="clearAll()">전체 삭제</button>
       </div>
 
-      <div class="toolbar">
-        <div class="toolbar-group">
-          <label for="search">검색</label>
-          <input id="search" placeholder="제목 검색">
-        </div>
-        <div class="toolbar-group">
-          <label for="sort">정렬</label>
-          <select id="sort">
-            <option value="createdDesc">최근 추가순</option>
-            <option value="titleAsc">이름순 (가나다)</option>
-          </select>
-        </div>
-        <div class="toolbar-group">
-          <label for="filter">상태</label>
-          <select id="filter">
-            <option value="ALL">전체</option>
-            <option value="O">O · 다 봄</option>
-            <option value="W">△ · 보는 중</option>
-            <option value="X">X · 안 봄</option>
-          </select>
-        </div>
+      <div class="input-row">
+        <input id="search" placeholder="제목 검색" style="min-width: 130px" />
+        <select id="sort">
+          <option value="createdDesc">최근 추가순</option>
+          <option value="titleAsc">이름순 (가나다)</option>
+        </select>
+        <select id="filter">
+          <option value="ALL">전체</option>
+          <option value="O">O · 다 봄</option>
+          <option value="W">△ · 보는 중</option>
+          <option value="X">X · 안 봄</option>
+        </select>
+        <span class="badge" id="countBadge"></span>
       </div>
     </div>
 
     <div id="grid" class="grid"></div>
-    <div id="empty" class="empty" style="display:none;">데이터가 없습니다. 위에서 작품을 추가해보세요.</div>
+    <div id="empty" class="empty" style="display: none;">
+      데이터가 없습니다. 위에서 작품을 추가해주세요.
+    </div>
   </div>
 
   <script type="module">
@@ -359,7 +306,7 @@
       getDocs
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-    // 네 Firebase 프로젝트 설정
+    // Firebase 설정
     const firebaseConfig = {
       apiKey: "AIzaSyDpbP8aBRqOQtLNLDbtrly49ozPon4SQaWE",
       authDomain: "anime-list-85c9e.firebaseapp.com",
@@ -378,8 +325,30 @@
     let filterStatus = "ALL";
     let searchQuery = "";
 
-    // 제목별 썸네일 캐시
-    const IMAGE_CACHE = {};
+    const titleInput = document.getElementById("title");
+    const episodeInput = document.getElementById("episode");
+    const seenInput = document.getElementById("seen");
+    const typeInput = document.getElementById("type");
+    const searchInput = document.getElementById("search");
+    const sortSelect = document.getElementById("sort");
+    const filterSelect = document.getElementById("filter");
+    const themeSelect = document.getElementById("themeSelect");
+    const countBadge = document.getElementById("countBadge");
+
+    // --- 테마 관련 ---
+    function setTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("animeListTheme", theme);
+    }
+
+    // 초기 테마 적용
+    const savedTheme = localStorage.getItem("animeListTheme") || "dark";
+    setTheme(savedTheme);
+    themeSelect.value = savedTheme;
+
+    themeSelect.addEventListener("change", (e) => {
+      setTheme(e.target.value);
+    });
 
     // Firestore 실시간 구독
     const q = query(itemsCol, orderBy("createdAt", "asc"));
@@ -391,13 +360,9 @@
       render();
     });
 
-    // 입력/필터 이벤트 연결
-    const searchInput = document.getElementById("search");
-    const sortSelect = document.getElementById("sort");
-    const filterSelect = document.getElementById("filter");
-
+    // 검색/정렬/필터 이벤트
     searchInput.addEventListener("input", (e) => {
-      searchQuery = e.target.value.trim().toLowerCase();
+      searchQuery = e.target.value.toLowerCase();
       render();
     });
 
@@ -413,10 +378,10 @@
 
     // 항목 추가
     window.addItem = async function () {
-      const title = document.getElementById("title").value.trim();
-      const episode = document.getElementById("episode").value.trim();
-      const seen = document.getElementById("seen").value;
-      const type = document.getElementById("type").value.trim();
+      const title = titleInput.value.trim();
+      const episode = episodeInput.value.trim();
+      const seen = seenInput.value;
+      const type = typeInput.value.trim();
 
       if (!title) {
         alert("작품 이름을 입력해주세요!");
@@ -431,9 +396,9 @@
         createdAt: Date.now()
       });
 
-      document.getElementById("title").value = "";
-      document.getElementById("episode").value = "";
-      document.getElementById("type").value = "";
+      titleInput.value = "";
+      episodeInput.value = "";
+      typeInput.value = "";
     };
 
     // 상태 변경
@@ -455,7 +420,6 @@
       await Promise.all(tasks);
     };
 
-    // createdAt 숫자/타임스탬프 둘 다 지원
     function getCreatedAtMs(item) {
       const v = item.createdAt;
       if (!v) return 0;
@@ -470,134 +434,99 @@
       return "X";
     }
 
-    // 썸네일 가져오기
-    async function fetchThumbnail(item) {
-      const title = (item.title || "").trim();
-      if (!title) return null;
-
-      // 캐시 먼저 확인
-      if (IMAGE_CACHE[title]) return IMAGE_CACHE[title];
-
-      // 문서에 이미 저장된 경우
-      if (item.imageUrl) {
-        IMAGE_CACHE[title] = item.imageUrl;
-        return item.imageUrl;
-      }
-
-      try {
-        const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        const img = data?.data?.[0]?.images?.jpg?.image_url;
-        IMAGE_CACHE[title] = img || null;
-
-        if (img) {
-          // Firestore에 저장해 두면 다음에 바로 사용 가능
-          try {
-            await updateDoc(doc(db, "animeItems", item.id), { imageUrl: img });
-          } catch (err) {
-            // 권한 문제 등은 무시하고 넘어감
-          }
-        }
-        return img || null;
-      } catch (e) {
-        console.warn("썸네일 가져오기 실패:", title, e);
-        IMAGE_CACHE[title] = null;
-        return null;
-      }
-    }
-
-    // 렌더링
     function render() {
       const grid = document.getElementById("grid");
       const emptyEl = document.getElementById("empty");
       grid.innerHTML = "";
 
-      let display = items.map((item) => ({
+      let arr = items.map((item) => ({
         ...item,
         seen: normalizeSeen(item)
       }));
 
+      // 카운트 뱃지
+      const total = arr.length;
+      const doneCount = arr.filter((i) => i.seen === "O").length;
+      const watchingCount = arr.filter((i) => i.seen === "W").length;
+      const notCount = arr.filter((i) => i.seen === "X").length;
+      countBadge.textContent =
+        `전체 ${total} · O ${doneCount} · △ ${watchingCount} · X ${notCount}`;
+
+      // 검색
       if (searchQuery) {
-        display = display.filter((item) =>
-          (item.title || "").toLowerCase().includes(searchQuery)
+        arr = arr.filter((i) =>
+          (i.title || "").toLowerCase().includes(searchQuery)
         );
       }
 
+      // 상태 필터
       if (filterStatus !== "ALL") {
-        display = display.filter((item) => normalizeSeen(item) === filterStatus);
+        arr = arr.filter((i) => i.seen === filterStatus);
       }
 
-      display.sort((a, b) => {
+      // 정렬
+      arr.sort((a, b) => {
         if (sortMode === "titleAsc") {
           return (a.title || "").localeCompare(b.title || "", "ko");
-        } else {
-          return getCreatedAtMs(b) - getCreatedAtMs(a);
         }
+        // 최근 추가순 (createdAt 내림차순)
+        return getCreatedAtMs(b) - getCreatedAtMs(a);
       });
 
-      if (display.length === 0) {
+      if (arr.length === 0) {
         emptyEl.style.display = "block";
         return;
       } else {
         emptyEl.style.display = "none";
       }
 
-      display.forEach((item) => {
-        const status = normalizeSeen(item);
-
+      arr.forEach((item) => {
         const card = document.createElement("div");
         card.className = "card";
 
-        const thumbWrapper = document.createElement("div");
-        thumbWrapper.className = "thumb-wrapper";
+        const header = document.createElement("div");
+        header.className = "card-header";
 
-        const img = document.createElement("img");
-        img.className = "thumb";
-        img.style.display = "none";
-
-        const placeholder = document.createElement("div");
-        placeholder.className = "thumb-placeholder";
-        placeholder.textContent = "🎬";
-
-        thumbWrapper.appendChild(img);
-        thumbWrapper.appendChild(placeholder);
-
-        const chip = document.createElement("div");
-        chip.className = "status-chip";
-        if (status === "O") chip.classList.add("done");
-        else if (status === "W") chip.classList.add("watching");
-        else chip.classList.add("not");
-
-        chip.textContent =
-          status === "O" ? "다 봄" :
-          status === "W" ? "보는 중" : "안 봄";
-
-        thumbWrapper.appendChild(chip);
-
-        const body = document.createElement("div");
-        body.className = "card-body";
-
+        const titleBox = document.createElement("div");
         const titleEl = document.createElement("div");
         titleEl.className = "card-title";
         titleEl.textContent = item.title || "";
 
         const metaEl = document.createElement("div");
         metaEl.className = "card-meta";
-        metaEl.textContent = item.episode ? `${item.episode}` : "화 정보 없음";
+        metaEl.textContent = item.episode || "화 정보 없음";
+
+        titleBox.appendChild(titleEl);
+        titleBox.appendChild(metaEl);
+
+        const chip = document.createElement("div");
+        chip.className = "status-chip";
+        if (item.seen === "O") chip.classList.add("done");
+        else if (item.seen === "W") chip.classList.add("watching");
+        else chip.classList.add("not");
+
+        chip.textContent =
+          item.seen === "O"
+            ? "다 봄"
+            : item.seen === "W"
+            ? "보는 중"
+            : "안 봄";
+
+        header.appendChild(titleBox);
+        header.appendChild(chip);
 
         const statusRow = document.createElement("div");
         statusRow.className = "status-select-row";
+
         const pill = document.createElement("div");
         pill.className = "pill";
-        pill.textContent = "상태 변경";
+        pill.textContent = "상태";
 
         const select = document.createElement("select");
         select.innerHTML = `
-          <option value="O" ${status === "O" ? "selected" : ""}>O · 다 봄</option>
-          <option value="W" ${status === "W" ? "selected" : ""}>△ · 보는 중</option>
-          <option value="X" ${status === "X" ? "selected" : ""}>X · 안 봄</option>
+          <option value="O" ${item.seen === "O" ? "selected" : ""}>O · 다 봄</option>
+          <option value="W" ${item.seen === "W" ? "selected" : ""}>△ · 보는 중</option>
+          <option value="X" ${item.seen === "X" ? "selected" : ""}>X · 안 봄</option>
         `;
         select.onchange = (e) => toggleSeen(item.id, e.target.value);
 
@@ -613,10 +542,9 @@
 
         const timeEl = document.createElement("div");
         timeEl.className = "card-meta";
-        const d = getCreatedAtMs(item);
-        if (d) {
-          const date = new Date(d);
-          timeEl.textContent = date.toLocaleString("ko-KR");
+        const t = getCreatedAtMs(item);
+        if (t) {
+          timeEl.textContent = new Date(t).toLocaleString("ko-KR");
         } else {
           timeEl.textContent = "";
         }
@@ -629,29 +557,14 @@
         footer.appendChild(timeEl);
         footer.appendChild(delBtn);
 
-        body.appendChild(titleEl);
-        body.appendChild(metaEl);
-        body.appendChild(statusRow);
-        body.appendChild(memo);
-        body.appendChild(footer);
+        card.appendChild(header);
+        card.appendChild(statusRow);
+        card.appendChild(memo);
+        card.appendChild(footer);
 
-        card.appendChild(thumbWrapper);
-        card.appendChild(body);
         grid.appendChild(card);
-
-        // 썸네일 비동기 로딩
-        fetchThumbnail(item).then((url) => {
-          if (url) {
-            img.src = url;
-            img.onload = () => {
-              img.style.display = "block";
-              placeholder.style.display = "none";
-            };
-          }
-        });
       });
     }
   </script>
 </body>
 </html>
-
