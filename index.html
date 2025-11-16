@@ -379,7 +379,7 @@
       getDocs
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-    // Firebase 설정
+    // Firebase 설정 (네 프로젝트 값)
     const firebaseConfig = {
       apiKey: "AIzaSyDpbP8aBRqOQtLNLDbtrly49ozPon4SQaWE",
       authDomain: "anime-list-85c9e.firebaseapp.com",
@@ -538,21 +538,6 @@
         episodeNum: ep,
         episode: display
       });
-    }
-
-    /* ===== 회차 +1 / -1 ===== */
-    async function incrementEpisode(item, delta) {
-      const parsed = parseSeasonEpisode(
-        item.episode || "",
-        item.season ?? null,
-        item.episodeNum ?? null
-      );
-      let n = parsed.episodeNum ?? 0;
-      n += delta;
-      if (n < 0) n = 0;
-      if (n > 200) n = 200;
-
-      await saveSeasonEpisode(item.id, parsed.season, n);
     }
 
     /* ===== 삭제 & 전체 삭제 ===== */
@@ -723,16 +708,6 @@
           saveSeasonEpisode(item.id, seasonSelect.value, episodeSelect.value);
         };
 
-        const minusBtn = document.createElement("button");
-        minusBtn.className = "icon-btn";
-        minusBtn.textContent = "−1";
-        minusBtn.onclick = () => incrementEpisode(item, -1);
-
-        const plusBtn = document.createElement("button");
-        plusBtn.className = "icon-btn";
-        plusBtn.textContent = "+1";
-        plusBtn.onclick = () => incrementEpisode(item, 1);
-
         const saveBtn = document.createElement("button");
         saveBtn.className = "icon-btn";
         saveBtn.textContent = "저장";
@@ -743,8 +718,6 @@
         episodeRow.appendChild(epLabel);
         episodeRow.appendChild(seasonSelect);
         episodeRow.appendChild(episodeSelect);
-        episodeRow.appendChild(minusBtn);
-        episodeRow.appendChild(plusBtn);
         episodeRow.appendChild(saveBtn);
 
         middleBox.appendChild(chip);
