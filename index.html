@@ -320,6 +320,36 @@
       text-align: center;
     }
 
+    /* ===== 스크롤 버튼 ===== */
+    .scroll-btn {
+      position: fixed;
+      right: 16px;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      z-index: 50;
+      transition: transform 0.12s ease-out, opacity 0.12s ease-out, background 0.12s;
+      opacity: 0.9;
+    }
+
+    .scroll-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(15, 23, 42, 1);
+      opacity: 1;
+    }
+
+    .scroll-top { bottom: 72px; }
+    .scroll-bottom { bottom: 28px; }
+
     @media (max-width: 720px) {
       .card {
         grid-template-columns: 1fr;
@@ -329,6 +359,14 @@
         flex-direction: column;
         align-items: flex-start;
       }
+      .scroll-btn {
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        bottom: auto;
+      }
+      .scroll-top { bottom: 70px; }
+      .scroll-bottom { bottom: 28px; }
     }
   </style>
 </head>
@@ -386,6 +424,10 @@
     <div id="empty" class="empty" style="display:none;">데이터가 없습니다. 위에서 작품을 추가해보세요.</div>
   </div>
 
+  <!-- 맨 위 / 맨 아래 스크롤 버튼 -->
+  <button id="scrollTopBtn" class="scroll-btn scroll-top">▲</button>
+  <button id="scrollBottomBtn" class="scroll-btn scroll-bottom">▼</button>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
     import {
@@ -435,6 +477,8 @@
     const grid = document.getElementById("grid");
     const emptyEl = document.getElementById("empty");
     const statsSummary = document.getElementById("statsSummary");
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
+    const scrollBottomBtn = document.getElementById("scrollBottomBtn");
 
     // ===== 테마 처리 =====
     function applyTheme(mode) {
@@ -454,6 +498,16 @@
 
     themeSelect.addEventListener("change", (e) => {
       applyTheme(e.target.value);
+    });
+
+    // ===== 스크롤 버튼 =====
+    scrollTopBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    scrollBottomBtn.addEventListener("click", () => {
+      const doc = document.documentElement;
+      window.scrollTo({ top: doc.scrollHeight, behavior: "smooth" });
     });
 
     // ===== 유틸 =====
