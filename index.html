@@ -528,13 +528,20 @@
       return "X";
     }
 
+    // ✅ 예전 episode 필드까지 포함해서 회차 표시
     function formatEpisodeDisplay(item) {
+      // 예전 버전: episode 필드(예: "1기 3화")가 있으면 그걸 최우선으로 사용
+      if (item.episode) return item.episode;
+
       const season = item.season;
       const epNum = item.episodeNum;
+
       if (season && epNum) return `${season}기 ${epNum}화`;
       if (season && !epNum) return `${season}기`;
       if (!season && epNum) return `${epNum}화`;
+
       if (item.episodeText) return item.episodeText;
+
       return "회차 정보 없음";
     }
 
@@ -556,9 +563,14 @@
         return;
       }
 
+      const rawEpisode = episodeText || "";
+
       await addDoc(itemsCol, {
         title,
-        episodeText,
+        // ✅ 예전 필드도 같이 저장해서 호환
+        episode: rawEpisode,
+        // 새 구조용 텍스트 필드
+        episodeText: rawEpisode,
         seen,
         type: memoText,
         season: null,
@@ -584,7 +596,7 @@
       await Promise.all(tasks);
     };
 
-    // ----- 시즌/회차 저장 -----
+    // ----- 시즌/회차 저장 (예전 episode 필드도 같이 업데이트) -----
     async function saveEpisodeInfo(id, seasonValue, episodeValue) {
       const s = seasonValue === "0" ? null : Number(seasonValue);
       const e = episodeValue ? Number(episodeValue) : null;
@@ -593,11 +605,13 @@
       if (s && e) episodeText = `${s}기 ${e}화`;
       else if (s && !e) episodeText = `${s}기`;
       else if (!s && e) episodeText = `${e}화`;
+      else episodeText = ""; // 정보 없음
 
       await updateDoc(doc(db, "animeItems", id), {
         season: s,
         episodeNum: e,
         episodeText,
+        episode: episodeText, // ✅ 예전 필드도 같이 맞춰줌
       });
     }
 
@@ -727,9 +741,7 @@
           const o = document.createElement("option");
           o.value = opt.value;
           o.textContent = opt.label;
-          if (
-            (item.season || 0).toString() === opt.value.toString()
-          ) {
+          if ((item.season || 0).toString() === opt.value.toString()) {
             o.selected = true;
           }
           seasonSelect.appendChild(o);
