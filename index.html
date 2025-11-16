@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dark">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>애니리스트</title>
 
-  <!-- iPhone / iPad 홈 화면 아이콘 -->
+  <!-- iPhone / 홈 화면 아이콘 (원하는 512x512 PNG 파일명으로 수정 가능) -->
   <link rel="apple-touch-icon" href="icon_512.png" />
   <link rel="icon" type="image/png" href="icon_512.png" />
 
@@ -18,9 +18,6 @@
       --border: #e5e7eb;
       --accent: #38bdf8;
       --danger: #f97373;
-      --status-done: #dcfce7;
-      --status-watching: #fef9c3;
-      --status-not: #fee2e2;
       --chip-text: #111827;
     }
 
@@ -32,9 +29,6 @@
       --border: #1e293b;
       --accent: #38bdf8;
       --danger: #f97373;
-      --status-done: #14532d;
-      --status-watching: #78350f;
-      --status-not: #7f1d1d;
       --chip-text: #f9fafb;
     }
 
@@ -50,7 +44,7 @@
 
     .app { max-width: 980px; margin: 0 auto; }
 
-    /* ===== 제목 영역 (가운데 정렬) ===== */
+    /* ===== 제목 영역 ===== */
     .app-header {
       display: flex;
       flex-direction: column;
@@ -62,7 +56,7 @@
 
     h1 {
       margin: 0;
-      font-size: 26px;
+      font-size: 28px;
       letter-spacing: 0.08em;
     }
 
@@ -82,8 +76,17 @@
       color: var(--subtext);
     }
 
+    .theme-select {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--row-bg);
+      color: var(--text);
+    }
+
     /* ===== 입력 / 필터 영역 ===== */
-    .controls { margin-bottom: 12px; }
+    .controls { margin-bottom: 10px; }
 
     .input-row {
       display: flex;
@@ -143,21 +146,24 @@
 
     button.danger { background: #b91c1c; }
 
-    button.small-btn { padding: 3px 8px; font-size: 11px; }
+    .small-btn { padding: 3px 8px; font-size: 11px; }
 
-    .icon-btn {
-      padding: 6px 12px;
-      font-size: 13px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.7);
-      color: var(--subtext);
-      box-shadow: none;
+    .search-input {
+      flex: 1;
+      min-width: 180px;
     }
-    .icon-btn:hover {
-      background: rgba(148, 163, 184, 0.25);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.6);
-      transform: translateY(-1px);
+
+    .summary-row {
+      font-size: 13px;
+      color: var(--subtext);
+      margin-bottom: 6px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
     }
 
     /* 상태 탭 */
@@ -191,13 +197,6 @@
       color: #f9fafb;
     }
 
-    .summary-text {
-      font-size: 12px;
-      color: var(--subtext);
-      margin-left: auto;
-      white-space: nowrap;
-    }
-
     /* ===== 리스트 형식 + 애니메이션 ===== */
     .grid {
       display: flex;
@@ -213,10 +212,10 @@
 
     .card {
       display: grid;
-      grid-template-columns: minmax(0, 2.6fr) minmax(0, 2.2fr) minmax(0, 1.4fr);
+      grid-template-columns: minmax(0, 2.8fr) minmax(0, 2.2fr) minmax(0, 1.6fr);
       gap: 4px 12px;
       align-items: center;
-      padding: 8px 12px;
+      padding: 10px 12px;
       background: var(--row-bg);
       border-radius: 14px;
       border: 1px solid var(--border);
@@ -234,12 +233,13 @@
     .card-header {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
-    .card-title-row {
+    .title-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
 
@@ -250,6 +250,11 @@
     }
 
     .card-meta {
+      font-size: 12px;
+      color: var(--subtext);
+    }
+
+    .episode-text {
       font-size: 12px;
       color: var(--subtext);
     }
@@ -266,17 +271,18 @@
       align-items: center;
       gap: 4px;
     }
+
     .status-chip.done {
-      background: var(--status-done);
-      border-color: rgba(34, 197, 94, 0.4);
+      background: #14532d;
+      border-color: rgba(34, 197, 94, 0.6);
     }
     .status-chip.watching {
-      background: var(--status-watching);
-      border-color: rgba(245, 158, 11, 0.5);
+      background: #78350f;
+      border-color: rgba(245, 158, 11, 0.7);
     }
     .status-chip.not {
-      background: var(--status-not);
-      border-color: rgba(248, 113, 113, 0.6);
+      background: #7f1d1d;
+      border-color: rgba(248, 113, 113, 0.8);
     }
 
     .status-select-row {
@@ -296,34 +302,6 @@
       white-space: nowrap;
     }
 
-    /* 메모 입력 */
-    .memo-input {
-      width: 100%;
-      font-size: 13px;
-      color: var(--subtext);
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.4);
-      outline: none;
-    }
-
-    .memo-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
-      background: rgba(15, 23, 42, 0.8);
-    }
-
-    .card-footer {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--subtext);
-    }
-
-    /* 시즌/회차 편집 영역 */
     .episode-row {
       display: flex;
       align-items: center;
@@ -349,6 +327,24 @@
       color: var(--text);
     }
 
+    .memo-input {
+      margin-top: 4px;
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      font-size: 13px;
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
     .empty {
       margin-top: 16px;
       font-size: 13px;
@@ -357,69 +353,63 @@
     }
 
     @media (max-width: 720px) {
-      body { padding: 12px; }
-
+      body { padding: 14px; }
       .card {
         grid-template-columns: 1fr;
         align-items: flex-start;
       }
-
       .card-footer {
-        justify-content: space-between;
-        width: 100%;
-      }
-
-      .summary-text {
-        margin-left: 0;
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <!-- 헤더 -->
-    <div class="app-header">
+    <header class="app-header">
       <h1>애니리스트</h1>
       <div class="header-actions">
-        <button id="themeToggle" class="icon-btn">다크 모드</button>
-        <button class="danger" onclick="clearAll()">전체 삭제</button>
-        <span class="badge">Firebase 실시간 동기화</span>
+        <select id="themeSelect" class="theme-select">
+          <option value="dark">다크 모드</option>
+          <option value="light">라이트 모드</option>
+        </select>
+        <span class="badge">상태 · 시즌 · 회차 · 메모 모두 자동 저장</span>
       </div>
-    </div>
+    </header>
 
-    <!-- 입력 / 필터 -->
-    <div class="controls">
+    <section class="controls">
       <div class="input-row">
-        <input id="title" placeholder="작품 이름" />
-        <input id="episodeText" placeholder="회차 (예: 1기 3화)" />
-        <input id="memoInput" placeholder="메모" />
-        <select id="seen">
+        <input id="titleInput" placeholder="작품 이름" />
+        <input id="episodeInput" placeholder="회차 (예: 1기 3화)" />
+        <select id="seenInput">
           <option value="O">O · 다 봄</option>
           <option value="W">△ · 보는 중</option>
           <option value="X">X · 안 봄</option>
         </select>
-        <button onclick="addItem()">+ 추가</button>
+        <input id="memoInput" placeholder="메모 (만화/애니/기타)" />
+        <button id="addBtn">+ 추가</button>
+        <button id="clearBtn" class="danger">전체 삭제</button>
       </div>
 
-      <div class="input-row">
-        <input id="search" placeholder="제목 검색" />
-        <select id="sort">
+      <div class="input-row filter-row">
+        <input id="searchInput" class="search-input" placeholder="제목 검색" />
+        <select id="sortSelect">
           <option value="createdDesc">최근 추가순</option>
           <option value="titleAsc">이름순 (가나다)</option>
         </select>
 
-        <div class="status-tabs" id="statusTabs">
+        <div class="status-tabs">
           <button class="status-tab active" data-filter="ALL">전체</button>
           <button class="status-tab" data-filter="W">보는 중</button>
           <button class="status-tab" data-filter="O">다 봄</button>
           <button class="status-tab" data-filter="X">안 봄</button>
         </div>
-
-        <div id="summaryText" class="summary-text"></div>
       </div>
-    </div>
+    </section>
 
-    <!-- 리스트 -->
+    <div id="summary" class="summary-row"></div>
+
     <div id="grid" class="grid"></div>
     <div id="empty" class="empty" style="display:none;">데이터가 없습니다. 위에서 작품을 추가해보세요.</div>
   </div>
@@ -436,51 +426,136 @@
       doc,
       updateDoc,
       deleteDoc,
-      getDocs,
+      getDocs
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-    // ----- Firebase 설정 -----
+    // --- Firebase 설정 ---
     const firebaseConfig = {
       apiKey: "AIzaSyDpbP8aBRqOQtLNLDbtrly49ozPon4SQaWE",
       authDomain: "anime-list-85c9e.firebaseapp.com",
       projectId: "anime-list-85c9e",
       storageBucket: "anime-list-85c9e.firebasestorage.app",
       messagingSenderId: "397442929562",
-      appId: "1:397442929562:web:1b5e3e90cbbfa8a573d8e51",
+      appId: "1:397442929562:web:1b5e3e90cbbfa8a573d8e51"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const itemsCol = collection(db, "animeItems");
 
+    // ---- 상태 변수 ----
     let items = [];
     let sortMode = "createdDesc";
-    let filterStatus = "ALL";
+    let filterSeen = "ALL";
     let searchQuery = "";
 
-    // ----- 테마 토글 -----
-    const themeToggle = document.getElementById("themeToggle");
-    const root = document.documentElement;
+    // ---- DOM 참조 ----
+    const themeSelect   = document.getElementById("themeSelect");
+    const titleInput    = document.getElementById("titleInput");
+    const episodeInput  = document.getElementById("episodeInput");
+    const seenInput     = document.getElementById("seenInput");
+    const memoInputTop  = document.getElementById("memoInput");
+    const addBtn        = document.getElementById("addBtn");
+    const clearBtn      = document.getElementById("clearBtn");
+    const searchInput   = document.getElementById("searchInput");
+    const sortSelect    = document.getElementById("sortSelect");
+    const summaryEl     = document.getElementById("summary");
+    const grid          = document.getElementById("grid");
+    const emptyEl       = document.getElementById("empty");
+    const statusTabs    = document.querySelectorAll(".status-tab");
 
-    function applyTheme(theme) {
-      root.setAttribute("data-theme", theme);
-      themeToggle.textContent = theme === "dark" ? "라이트 모드" : "다크 모드";
-      localStorage.setItem("animeListTheme", theme);
+    // ---- 유틸 함수 ----
+    function normalizeSeen(v) {
+      v = (v || "X").toUpperCase();
+      if (v === "O" || v === "W" || v === "X") return v;
+      return "X";
+    }
+
+    function getCreatedAtMs(item) {
+      const v = item.createdAt;
+      if (!v) return 0;
+      if (typeof v === "number") return v;
+      if (v.toMillis) return v.toMillis();
+      return 0;
+    }
+
+    function buildEpisodeText(season, episodeNum) {
+      let s = "";
+      if (season != null) s += season + "기";
+      if (episodeNum != null) {
+        if (s) s += " ";
+        s += episodeNum + "화";
+      }
+      return s;
+    }
+
+    // "1기 3화" 같은 문자열을 분리
+    function parseEpisodeText(text) {
+      text = (text || "").trim();
+      if (!text) return { season: null, episodeNum: null, episodeText: "" };
+
+      let season = null;
+      let episodeNum = null;
+
+      const seasonMatch = text.match(/(\d+)\s*기/);
+      if (seasonMatch) season = Number(seasonMatch[1]);
+
+      const epMatch = text.match(/(\d+)\s*화/);
+      if (epMatch) episodeNum = Number(epMatch[1]);
+
+      const episodeText = buildEpisodeText(season, episodeNum) || text;
+      return { season, episodeNum, episodeText };
+    }
+
+    // 예전 episode 문자열을 자동으로 season/episodeNum에 반영
+    function autoFixEpisodeStructure(item) {
+      const raw = item.episodeText || item.episode || "";
+      if (!raw) return null;
+
+      const parsed = parseEpisodeText(raw);
+      const seasonNew = parsed.season ?? null;
+      const episodeNew = parsed.episodeNum ?? null;
+
+      const currentSeason = item.season ?? null;
+      const currentEpisode = item.episodeNum ?? null;
+
+      if (seasonNew === currentSeason && episodeNew === currentEpisode) return null;
+
+      return {
+        season: seasonNew,
+        episodeNum: episodeNew,
+        episodeText: parsed.episodeText
+      };
+    }
+
+    function debounce(fn, delay = 300) {
+      let t;
+      return (...args) => {
+        clearTimeout(t);
+        t = setTimeout(() => fn(...args), delay);
+      };
+    }
+
+    // ---- 테마 ----
+    const THEME_KEY = "animeListTheme";
+    function setTheme(mode) {
+      document.documentElement.dataset.theme = mode;
+      localStorage.setItem(THEME_KEY, mode);
+      themeSelect.value = mode;
     }
 
     (function initTheme() {
-      const saved = localStorage.getItem("animeListTheme") || "dark";
-      applyTheme(saved);
+      const saved = localStorage.getItem(THEME_KEY) || "dark";
+      setTheme(saved);
     })();
 
-    themeToggle.addEventListener("click", () => {
-      const current = root.getAttribute("data-theme") || "dark";
-      applyTheme(current === "dark" ? "light" : "dark");
+    themeSelect.addEventListener("change", (e) => {
+      setTheme(e.target.value);
     });
 
-    // ----- 실시간 구독 -----
-    const qRef = query(itemsCol, orderBy("createdAt", "asc"));
-    onSnapshot(qRef, (snapshot) => {
+    // ---- Firestore 실시간 구독 ----
+    const q = query(itemsCol, orderBy("createdAt", "asc"));
+    onSnapshot(q, (snapshot) => {
       items = [];
       snapshot.forEach((docSnap) => {
         items.push({ id: docSnap.id, ...docSnap.data() });
@@ -488,11 +563,50 @@
       render();
     });
 
-    // ----- 입력/필터 이벤트 -----
-    const searchInput = document.getElementById("search");
-    const sortSelect = document.getElementById("sort");
-    const statusTabs = document.querySelectorAll(".status-tab");
-    const summaryText = document.getElementById("summaryText");
+    // ---- 입력 이벤트 ----
+    addBtn.addEventListener("click", addItem);
+    titleInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addItem();
+    });
+    episodeInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addItem();
+    });
+
+    async function addItem() {
+      const title = titleInput.value.trim();
+      const episodeRaw = episodeInput.value.trim();
+      const seen = seenInput.value;
+      const memo = memoInputTop.value.trim();
+
+      if (!title) {
+        alert("작품 이름을 입력해주세요!");
+        return;
+      }
+
+      const { season, episodeNum, episodeText } = parseEpisodeText(episodeRaw);
+
+      await addDoc(itemsCol, {
+        title,
+        seen,
+        type: memo,
+        season,
+        episodeNum,
+        episodeText: episodeText || episodeRaw,
+        createdAt: Date.now()
+      });
+
+      titleInput.value = "";
+      episodeInput.value = "";
+      memoInputTop.value = "";
+      seenInput.value = "O";
+    }
+
+    clearBtn.addEventListener("click", async () => {
+      if (!confirm("정말 전체 삭제할까요?")) return;
+      const snap = await getDocs(itemsCol);
+      const tasks = snap.docs.map((d) => deleteDoc(d.ref));
+      await Promise.all(tasks);
+    });
 
     searchInput.addEventListener("input", (e) => {
       searchQuery = e.target.value.trim().toLowerCase();
@@ -504,150 +618,46 @@
       render();
     });
 
-    statusTabs.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        statusTabs.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        filterStatus = btn.dataset.filter;
+    statusTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        statusTabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        filterSeen = tab.dataset.filter;
         render();
       });
     });
 
-    // ----- 도우미 함수들 -----
-    function getCreatedAtMs(item) {
-      const v = item.createdAt;
-      if (!v) return 0;
-      if (typeof v === "number") return v;
-      if (v.toMillis) return v.toMillis();
-      return 0;
-    }
-
-    function normalizeSeen(item) {
-      const v = (item.seen || "X").toUpperCase();
-      if (v === "O" || v === "W" || v === "X") return v;
-      return "X";
-    }
-
-    // ✅ 예전 episode 필드까지 포함해서 회차 표시
-    function formatEpisodeDisplay(item) {
-      // 예전 버전: episode 필드(예: "1기 3화")가 있으면 그걸 최우선으로 사용
-      if (item.episode) return item.episode;
-
-      const season = item.season;
-      const epNum = item.episodeNum;
-
-      if (season && epNum) return `${season}기 ${epNum}화`;
-      if (season && !epNum) return `${season}기`;
-      if (!season && epNum) return `${epNum}화`;
-
-      if (item.episodeText) return item.episodeText;
-
-      return "회차 정보 없음";
-    }
-
-    function buildNumberOptions(max) {
-      const arr = [];
-      for (let i = 1; i <= max; i++) arr.push(i);
-      return arr;
-    }
-
-    // ----- 항목 추가 -----
-    window.addItem = async function () {
-      const title = document.getElementById("title").value.trim();
-      const episodeText = document.getElementById("episodeText").value.trim();
-      const memoText = document.getElementById("memoInput").value.trim();
-      const seen = document.getElementById("seen").value;
-
-      if (!title) {
-        alert("작품 이름을 입력해주세요!");
-        return;
-      }
-
-      const rawEpisode = episodeText || "";
-
-      await addDoc(itemsCol, {
-        title,
-        // ✅ 예전 필드도 같이 저장해서 호환
-        episode: rawEpisode,
-        // 새 구조용 텍스트 필드
-        episodeText: rawEpisode,
-        seen,
-        type: memoText,
-        season: null,
-        episodeNum: null,
-        createdAt: Date.now(),
-      });
-
-      document.getElementById("title").value = "";
-      document.getElementById("episodeText").value = "";
-      document.getElementById("memoInput").value = "";
-    };
-
-    // ----- 상태 변경 -----
-    window.toggleSeen = async function (id, value) {
-      await updateDoc(doc(db, "animeItems", id), { seen: value });
-    };
-
-    // ----- 전체 삭제 -----
-    window.clearAll = async function () {
-      if (!confirm("정말 전체 삭제할까요?")) return;
-      const snap = await getDocs(itemsCol);
-      const tasks = snap.docs.map((d) => deleteDoc(d.ref));
-      await Promise.all(tasks);
-    };
-
-    // ----- 시즌/회차 저장 (예전 episode 필드도 같이 업데이트) -----
-    async function saveEpisodeInfo(id, seasonValue, episodeValue) {
-      const s = seasonValue === "0" ? null : Number(seasonValue);
-      const e = episodeValue ? Number(episodeValue) : null;
-
-      let episodeText = "";
-      if (s && e) episodeText = `${s}기 ${e}화`;
-      else if (s && !e) episodeText = `${s}기`;
-      else if (!s && e) episodeText = `${e}화`;
-      else episodeText = ""; // 정보 없음
-
-      await updateDoc(doc(db, "animeItems", id), {
-        season: s,
-        episodeNum: e,
-        episodeText,
-        episode: episodeText, // ✅ 예전 필드도 같이 맞춰줌
-      });
-    }
-
-    // ----- 메모 저장 -----
-    async function saveMemo(id, memoText) {
-      await updateDoc(doc(db, "animeItems", id), {
-        type: memoText.trim(),
-      });
-    }
-
-    // ----- 렌더링 -----
+    // ---- 렌더링 ----
     function render() {
-      const grid = document.getElementById("grid");
-      const emptyEl = document.getElementById("empty");
       grid.innerHTML = "";
 
+      // 요약 계산
+      let countAll = items.length;
+      let countO = 0, countW = 0, countX = 0;
+      items.forEach((it) => {
+        const s = normalizeSeen(it.seen);
+        if (s === "O") countO++;
+        else if (s === "W") countW++;
+        else if (s === "X") countX++;
+      });
+      summaryEl.textContent = `전체 ${countAll} · O ${countO} · △ ${countW} · X ${countX}`;
+
+      // 필터/검색/정렬
       let display = items.map((item) => ({
         ...item,
-        seen: normalizeSeen(item),
+        seen: normalizeSeen(item.seen)
       }));
 
-      // 검색 필터
       if (searchQuery) {
         display = display.filter((item) =>
           (item.title || "").toLowerCase().includes(searchQuery)
         );
       }
 
-      // 상태 필터
-      if (filterStatus !== "ALL") {
-        display = display.filter(
-          (item) => normalizeSeen(item) === filterStatus
-        );
+      if (filterSeen !== "ALL") {
+        display = display.filter((item) => normalizeSeen(item.seen) === filterSeen);
       }
 
-      // 정렬
       display.sort((a, b) => {
         if (sortMode === "titleAsc") {
           return (a.title || "").localeCompare(b.title || "", "ko");
@@ -655,13 +665,6 @@
           return getCreatedAtMs(b) - getCreatedAtMs(a);
         }
       });
-
-      // 요약(전체 기준)
-      const total = items.length;
-      const countO = items.filter((i) => normalizeSeen(i) === "O").length;
-      const countW = items.filter((i) => normalizeSeen(i) === "W").length;
-      const countX = items.filter((i) => normalizeSeen(i) === "X").length;
-      summaryText.textContent = `전체 ${total} · O ${countO} · △ ${countW} · X ${countX}`;
 
       if (display.length === 0) {
         emptyEl.style.display = "block";
@@ -671,17 +674,35 @@
       }
 
       display.forEach((item) => {
-        const status = normalizeSeen(item);
+        const docRef = doc(db, "animeItems", item.id);
 
+        // 예전 episode 문자열을 자동으로 season/episodeNum에 반영
+        const fixed = autoFixEpisodeStructure(item);
+        if (fixed) {
+          updateDoc(docRef, fixed).catch(console.error);
+          item = { ...item, ...fixed };
+        }
+
+        const season = item.season ?? null;
+        const episodeNum = item.episodeNum ?? null;
+        const episodeText =
+          item.episodeText ||
+          item.episode ||
+          buildEpisodeText(season, episodeNum) ||
+          "회차 정보 없음";
+
+        const seen = normalizeSeen(item.seen);
+
+        // --- 카드 생성 ---
         const card = document.createElement("div");
         card.className = "card";
 
-        // ===== 1열: 제목 / 회차 / 메모 =====
-        const header = document.createElement("div");
-        header.className = "card-header";
+        // ===== 왼쪽 영역: 제목 + 회차 + 메모 =====
+        const left = document.createElement("div");
+        left.className = "card-header";
 
         const titleRow = document.createElement("div");
-        titleRow.className = "card-title-row";
+        titleRow.className = "title-row";
 
         const titleEl = document.createElement("div");
         titleEl.className = "card-title";
@@ -689,121 +710,127 @@
 
         const chip = document.createElement("div");
         chip.className = "status-chip";
-        if (status === "O") chip.classList.add("done");
-        else if (status === "W") chip.classList.add("watching");
+        if (seen === "O") chip.classList.add("done");
+        else if (seen === "W") chip.classList.add("watching");
         else chip.classList.add("not");
-
         chip.textContent =
-          status === "O" ? "다 봄" : status === "W" ? "보는 중" : "안 봄";
+          seen === "O" ? "다 봄" :
+          seen === "W" ? "보는 중" : "안 봄";
 
         titleRow.appendChild(titleEl);
         titleRow.appendChild(chip);
 
-        const metaEl = document.createElement("div");
-        metaEl.className = "card-meta";
-        metaEl.textContent = formatEpisodeDisplay(item);
+        const epTextEl = document.createElement("div");
+        epTextEl.className = "episode-text";
+        epTextEl.textContent = episodeText;
 
-        // 메모 입력
         const memoInput = document.createElement("input");
         memoInput.className = "memo-input";
         memoInput.placeholder = "메모";
         memoInput.value = item.type || "";
-        memoInput.addEventListener("change", () => {
-          saveMemo(item.id, memoInput.value);
+
+        const saveMemo = debounce(async (value) => {
+          await updateDoc(docRef, { type: value });
+        }, 400);
+
+        memoInput.addEventListener("input", (e) => {
+          saveMemo(e.target.value.trim());
         });
 
-        header.appendChild(titleRow);
-        header.appendChild(metaEl);
-        header.appendChild(memoInput);
+        left.appendChild(titleRow);
+        left.appendChild(epTextEl);
+        left.appendChild(memoInput);
 
-        // ===== 2열: 시즌 / 회차 선택 =====
-        const midCol = document.createElement("div");
+        // ===== 가운데 영역: 상태 + 시즌/회차 선택 =====
+        const mid = document.createElement("div");
 
-        const episodeRow = document.createElement("div");
-        episodeRow.className = "episode-row";
+        const statusRow = document.createElement("div");
+        statusRow.className = "status-select-row";
 
-        const epLabel = document.createElement("span");
+        const statusPill = document.createElement("div");
+        statusPill.className = "pill";
+        statusPill.textContent = "상태";
+
+        const statusSelect = document.createElement("select");
+        statusSelect.className = "wheel-select";
+        statusSelect.innerHTML = `
+          <option value="O" ${seen === "O" ? "selected" : ""}>O · 다 봄</option>
+          <option value="W" ${seen === "W" ? "selected" : ""}>△ · 보는 중</option>
+          <option value="X" ${seen === "X" ? "selected" : ""}>X · 안 봄</option>
+        `;
+        statusSelect.addEventListener("change", async (e) => {
+          const val = e.target.value;
+          await updateDoc(docRef, { seen: val });
+        });
+
+        statusRow.appendChild(statusPill);
+        statusRow.appendChild(statusSelect);
+
+        const epRow = document.createElement("div");
+        epRow.className = "episode-row";
+
+        const epLabel = document.createElement("div");
         epLabel.className = "episode-label";
         epLabel.textContent = "시즌 / 회차";
 
         const seasonSelect = document.createElement("select");
         seasonSelect.className = "wheel-select";
+        const seasonOptions = ["시즌 없음"].concat(
+          Array.from({ length: 10 }, (_, i) => `${i + 1}기`)
+        );
+        seasonOptions.forEach((label, idx) => {
+          const opt = document.createElement("option");
+          opt.textContent = label;
+          opt.value = idx === 0 ? "-" : String(idx);
+          const sVal = season ?? null;
+          if (idx === 0 && (sVal === null || sVal === undefined)) opt.selected = true;
+          if (idx !== 0 && sVal === idx) opt.selected = true;
+          seasonSelect.appendChild(opt);
+        });
 
-        const seasonOptions = [
-          { value: "0", label: "시즌 없음" },
-          { value: "1", label: "1기" },
-          { value: "2", label: "2기" },
-          { value: "3", label: "3기" },
-          { value: "4", label: "4기" },
-          { value: "5", label: "5기" },
-        ];
-        seasonOptions.forEach((opt) => {
-          const o = document.createElement("option");
-          o.value = opt.value;
-          o.textContent = opt.label;
-          if ((item.season || 0).toString() === opt.value.toString()) {
-            o.selected = true;
-          }
-          seasonSelect.appendChild(o);
+        seasonSelect.addEventListener("change", async (e) => {
+          const v = e.target.value;
+          const newSeason = v === "-" ? null : Number(v);
+          await updateDoc(docRef, { season: newSeason });
         });
 
         const episodeSelect = document.createElement("select");
         episodeSelect.className = "wheel-select";
-
-        const defaultOpt = document.createElement("option");
-        defaultOpt.value = "";
-        defaultOpt.textContent = "회차 없음";
-        episodeSelect.appendChild(defaultOpt);
-
-        buildNumberOptions(50).forEach((n) => {
-          const o = document.createElement("option");
-          o.value = String(n);
-          o.textContent = `${n}화`;
-          if (item.episodeNum === n) o.selected = true;
-          episodeSelect.appendChild(o);
+        const epOptions = ["회차 없음"].concat(
+          Array.from({ length: 50 }, (_, i) => `${i + 1}화`)
+        );
+        epOptions.forEach((label, idx) => {
+          const opt = document.createElement("option");
+          opt.textContent = label;
+          opt.value = idx === 0 ? "-" : String(idx);
+          const eVal = episodeNum ?? null;
+          if (idx === 0 && (eVal === null || eVal === undefined)) opt.selected = true;
+          if (idx !== 0 && eVal === idx) opt.selected = true;
+          episodeSelect.appendChild(opt);
         });
 
-        const saveBtn = document.createElement("button");
-        saveBtn.className = "small-btn secondary";
-        saveBtn.textContent = "저장";
-        saveBtn.addEventListener("click", () => {
-          saveEpisodeInfo(item.id, seasonSelect.value, episodeSelect.value);
+        episodeSelect.addEventListener("change", async (e) => {
+          const v = e.target.value;
+          const newEp = v === "-" ? null : Number(v);
+          await updateDoc(docRef, { episodeNum: newEp });
         });
 
-        episodeRow.appendChild(epLabel);
-        episodeRow.appendChild(seasonSelect);
-        episodeRow.appendChild(episodeSelect);
-        episodeRow.appendChild(saveBtn);
+        epRow.appendChild(epLabel);
+        epRow.appendChild(seasonSelect);
+        epRow.appendChild(episodeSelect);
 
-        midCol.appendChild(episodeRow);
+        mid.appendChild(statusRow);
+        mid.appendChild(epRow);
 
-        // ===== 3열: 상태 셀렉트 + 시간 + 삭제 =====
-        const footerCol = document.createElement("div");
-        footerCol.className = "card-footer";
-
-        const statusRow = document.createElement("div");
-        statusRow.className = "status-select-row";
-
-        const pill = document.createElement("div");
-        pill.className = "pill";
-        pill.textContent = "상태";
-
-        const select = document.createElement("select");
-        select.innerHTML = `
-          <option value="O" ${status === "O" ? "selected" : ""}>O · 다 봄</option>
-          <option value="W" ${status === "W" ? "selected" : ""}>△ · 보는 중</option>
-          <option value="X" ${status === "X" ? "selected" : ""}>X · 안 봄</option>
-        `;
-        select.onchange = (e) => toggleSeen(item.id, e.target.value);
-
-        statusRow.appendChild(pill);
-        statusRow.appendChild(select);
+        // ===== 오른쪽 영역: 날짜 + 삭제 =====
+        const right = document.createElement("div");
+        right.className = "card-footer";
 
         const timeEl = document.createElement("div");
         timeEl.className = "card-meta";
-        const d = getCreatedAtMs(item);
-        if (d) {
-          const date = new Date(d);
+        const ms = getCreatedAtMs(item);
+        if (ms) {
+          const date = new Date(ms);
           timeEl.textContent = date.toLocaleString("ko-KR");
         } else {
           timeEl.textContent = "";
@@ -812,18 +839,17 @@
         const delBtn = document.createElement("button");
         delBtn.className = "secondary small-btn";
         delBtn.textContent = "삭제";
-        delBtn.onclick = async () => {
+        delBtn.addEventListener("click", async () => {
           if (!confirm("이 항목을 삭제할까요?")) return;
-          await deleteDoc(doc(db, "animeItems", item.id));
-        };
+          await deleteDoc(docRef);
+        });
 
-        footerCol.appendChild(statusRow);
-        footerCol.appendChild(timeEl);
-        footerCol.appendChild(delBtn);
+        right.appendChild(timeEl);
+        right.appendChild(delBtn);
 
-        card.appendChild(header);
-        card.appendChild(midCol);
-        card.appendChild(footerCol);
+        card.appendChild(left);
+        card.appendChild(mid);
+        card.appendChild(right);
 
         grid.appendChild(card);
       });
