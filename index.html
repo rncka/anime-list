@@ -94,7 +94,8 @@
 
     input,
     select,
-    button {
+    button,
+    textarea {
       font-size: 13px;
       padding: 6px 9px;
       border-radius: 999px;
@@ -104,10 +105,18 @@
       outline: none;
     }
 
-    input::placeholder { color: var(--subtext); }
+    textarea {
+      border-radius: 10px;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--subtext);
+    }
 
     input:focus,
-    select:focus {
+    select:focus,
+    textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
     }
@@ -234,6 +243,7 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      margin-bottom: 4px;
     }
     .status-chip.done {
       background: var(--status-done);
@@ -252,7 +262,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .pill {
@@ -272,6 +282,9 @@
       border-radius: 10px;
       border: 1px solid var(--border);
       background: rgba(15, 23, 42, 0.35);
+      width: 100%;
+      resize: vertical;
+      margin-top: 6px;
     }
 
     .memo:focus {
@@ -320,35 +333,34 @@
       text-align: center;
     }
 
-    /* ===== 스크롤 버튼 ===== */
-    .scroll-btn {
+    /* 스크롤 버튼 */
+    .scroll-buttons {
       position: fixed;
-      right: 16px;
-      width: 34px;
-      height: 34px;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 50;
+    }
+    .scroll-btn {
+      width: 40px;
+      height: 40px;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: rgba(15, 23, 42, 0.9);
-      color: var(--text);
+      color: #e5e7eb;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-      z-index: 50;
-      transition: transform 0.12s ease-out, opacity 0.12s ease-out, background 0.12s;
-      opacity: 0.9;
+      font-size: 18px;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.7);
     }
-
     .scroll-btn:hover {
       transform: translateY(-1px);
-      background: rgba(15, 23, 42, 1);
-      opacity: 1;
+      background: rgba(30, 64, 175, 0.9);
     }
-
-    .scroll-top { bottom: 72px; }
-    .scroll-bottom { bottom: 28px; }
 
     @media (max-width: 720px) {
       .card {
@@ -359,14 +371,6 @@
         flex-direction: column;
         align-items: flex-start;
       }
-      .scroll-btn {
-        right: 10px;
-        width: 32px;
-        height: 32px;
-        bottom: auto;
-      }
-      .scroll-top { bottom: 70px; }
-      .scroll-bottom { bottom: 28px; }
     }
   </style>
 </head>
@@ -424,9 +428,11 @@
     <div id="empty" class="empty" style="display:none;">데이터가 없습니다. 위에서 작품을 추가해보세요.</div>
   </div>
 
-  <!-- 맨 위 / 맨 아래 스크롤 버튼 -->
-  <button id="scrollTopBtn" class="scroll-btn scroll-top">▲</button>
-  <button id="scrollBottomBtn" class="scroll-btn scroll-bottom">▼</button>
+  <!-- 스크롤 버튼 -->
+  <div class="scroll-buttons">
+    <button id="scrollTopBtn" class="scroll-btn">▲</button>
+    <button id="scrollBottomBtn" class="scroll-btn">▼</button>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
@@ -504,10 +510,9 @@
     scrollTopBtn.addEventListener("click", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
-
     scrollBottomBtn.addEventListener("click", () => {
-      const doc = document.documentElement;
-      window.scrollTo({ top: doc.scrollHeight, behavior: "smooth" });
+      const h = document.documentElement.scrollHeight || document.body.scrollHeight;
+      window.scrollTo({ top: h, behavior: "smooth" });
     });
 
     // ===== 유틸 =====
@@ -532,6 +537,38 @@
       return [sPart, ePart].filter(Boolean).join(" ");
     }
 
+    // "2기 24화", "1기", "3화" 같은 문자열에서 시즌/회차 뽑기
+    function parseEpisodeInput(text) {
+      if (!text) return { season: null, episodeNum: null };
+      const cleaned = text.replace(/\s+/g, "").trim(); // 공백 제거
+
+      // 둘 다 있는 경우 (예: 2기24화, 2기24)
+      let match = cleaned.match(/(\d+)\s*기\s*(\d+)\s*화?/);
+      if (match) {
+        return { season: Number(match[1]), episodeNum: Number(match[2]) };
+      }
+
+      // "2기" 만 있는 경우
+      match = cleaned.match(/(\d+)\s*기/);
+      if (match) {
+        return { season: Number(match[1]), episodeNum: null };
+      }
+
+      // "24화" 만 있는 경우
+      match = cleaned.match(/(\d+)\s*화/);
+      if (match) {
+        return { season: null, episodeNum: Number(match[1]) };
+      }
+
+      // 그냥 숫자만 적은 경우 -> 회차로 간주
+      match = cleaned.match(/^(\d+)$/);
+      if (match) {
+        return { season: null, episodeNum: Number(match[1]) };
+      }
+
+      return { season: null, episodeNum: null };
+    }
+
     // ===== Firestore 실시간 구독 =====
     const qRef = query(itemsCol, orderBy("createdAt", "asc"));
     onSnapshot(qRef, (snapshot) => {
@@ -545,7 +582,7 @@
     // ===== 입력 이벤트 =====
     addBtn.addEventListener("click", async () => {
       const title = titleInput.value.trim();
-      const episodeText = episodeInput.value.trim();
+      const episodeTextRaw = episodeInput.value.trim();
       const seen = seenInput.value;
       const memo = memoInput.value.trim();
 
@@ -554,13 +591,17 @@
         return;
       }
 
+      const { season, episodeNum } = parseEpisodeInput(episodeTextRaw);
+      const episodeText =
+        episodeTextRaw || buildEpisodeText(season, episodeNum);
+
       await addDoc(itemsCol, {
         title,
         episodeText,
         seen,
         memo,
-        season: null,
-        episodeNum: null,
+        season: season ?? null,
+        episodeNum: episodeNum ?? null,
         createdAt: Date.now()
       });
 
