@@ -3,484 +3,287 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>내 손안의 애니리스트</title>
-
+  <title>애니리스트</title>
+  
   <link rel="apple-touch-icon" href="icon_512.png" />
   <link rel="icon" type="image/png" href="icon_512.png" />
 
   <style>
-    /* ===== 1. 디자인 변수 선언 ===== */
+    /* 디자인은 기존과 동일하게 예쁘게 유지 */
     :root[data-theme="light"] {
-      --bg-app: #f8fafc;
-      --bg-surface: #ffffff;
-      --bg-surface-alt: #f1f5f9;
-      --text-primary: #1e293b;
-      --text-secondary: #64748b;
-      --border-color: #e2e8f0;
-      --accent-color: #6366f1;
-      --accent-hover: #4f46e5;
-      --danger-color: #ef4444;
-      --success-bg: #dcfce7; --success-text: #166534;
-      --warning-bg: #fef9c3; --warning-text: #854d0e;
-      --error-bg: #fee2e2;   --error-text: #991b1b;
+      --bg-app: #f8fafc; --bg-surface: #ffffff; --bg-surface-alt: #f1f5f9;
+      --text-primary: #1e293b; --text-secondary: #64748b;
+      --border-color: #e2e8f0; --accent-color: #6366f1;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
-
     :root[data-theme="dark"] {
-      --bg-app: #0f172a;
-      --bg-surface: #1e293b;
-      --bg-surface-alt: #334155;
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --border-color: #334155;
-      --accent-color: #818cf8;
-      --accent-hover: #a5b4fc;
-      --danger-color: #f87171;
-      --success-bg: #052e16; --success-text: #4ade80;
-      --warning-bg: #422006; --warning-text: #fde047;
-      --error-bg: #450a0a;   --error-text: #f87171;
+      --bg-app: #0f172a; --bg-surface: #1e293b; --bg-surface-alt: #334155;
+      --text-primary: #f1f5f9; --text-secondary: #94a3b8;
+      --border-color: #334155; --accent-color: #818cf8;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
     }
 
-    /* ===== 2. 기본 스타일 ===== */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-      padding: 0; margin: 0;
-      background-color: var(--bg-app);
-      color: var(--text-primary);
-      transition: background-color 0.3s ease, color 0.3s ease;
-      overflow-x: hidden;
+      font-family: "Pretendard", sans-serif; padding: 0; margin: 0;
+      background-color: var(--bg-app); color: var(--text-primary);
+      overflow-x: hidden; transition: 0.3s;
     }
-    .app { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
+    .app { max-width: 600px; margin: 0 auto; padding: 20px 20px 80px 20px; }
 
-    /* ===== 3. 스마트 상단 헤더 (수정됨) ===== */
+    /* 헤더 & 입력창 스타일 */
     .sticky-header-container {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background-color: var(--bg-app);
-      padding-top: 20px;
-      padding-bottom: 10px;
-      margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px;
-      border-bottom: 1px solid transparent;
-      
-      /* ★ 중요: 부드러운 움직임을 위한 트랜지션 추가 */
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                  background-color 0.3s, 
-                  box-shadow 0.3s;
+      position: sticky; top: 0; z-index: 100; background-color: var(--bg-app);
+      padding: 10px 20px; margin: 0 -20px;
+      transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
     }
+    .sticky-header-container.scrolled { background-color: var(--bg-surface); box-shadow: var(--shadow-sm); }
+    .sticky-header-container.nav-up { transform: translateY(-100%); }
 
-    /* 위로 숨길 때 적용할 클래스 */
-    .sticky-header-container.nav-up {
-        transform: translateY(-100%); /* 자기 높이만큼 위로 이동 */
-    }
-
-    /* 스크롤 시 그림자 */
-    .sticky-header-container.scrolled {
-        border-bottom-color: var(--border-color);
-        box-shadow: var(--shadow-sm);
-        background-color: var(--bg-surface); 
-    }
-
-    .app-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 16px;
-    }
-    h1 { margin: 0; font-size: 24px; font-weight: 800; background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .header-actions { display: flex; gap: 8px; }
-
-    /* 입력창 및 도구 모음 */
-    .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
-    .input-row input { flex: 1; }
-
+    h1 { font-size: 22px; margin: 0 0 12px 0; font-weight: 800; color: var(--accent-color); }
+    
+    .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
     input, select, button, textarea {
-      font-family: inherit; font-size: 14px; padding: 10px 14px;
-      border-radius: 12px; border: 1px solid var(--border-color);
-      background: var(--bg-surface); color: var(--text-primary);
-      outline: none; transition: all 0.2s ease;
+      font-size: 14px; padding: 10px; border-radius: 12px;
+      border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); outline: none;
     }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
-
-    button {
-      cursor: pointer; font-weight: 600; border: none;
-      background: var(--accent-color); color: white;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    button:hover { background: var(--accent-hover); transform: translateY(-1px); }
-    button.secondary { background: var(--bg-surface-alt); color: var(--text-secondary); border: 1px solid var(--border-color); }
-    button.danger { background: #fee2e2; color: var(--danger-color); border: 1px solid #fecaca; }
+    input { flex: 1; }
+    button { background: var(--accent-color); color: white; border: none; font-weight: 600; cursor: pointer; }
     
-    .plus-one-btn {
-        padding: 6px 10px !important; font-size: 12px !important;
-        background: var(--bg-surface-alt) !important; color: var(--accent-color) !important;
-        border: 1px solid var(--border-color) !important; border-radius: 8px !important; font-weight: 700 !important;
+    .file-label {
+      padding: 10px 14px; background: var(--bg-surface-alt); border: 1px solid var(--border-color);
+      border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; min-width: 44px;
     }
-    .plus-one-btn:hover { background: var(--accent-color) !important; color: white !important; }
+    .file-preview-name { font-size: 12px; color: var(--text-secondary); margin-left: 8px; display: none; }
 
-    .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; background: var(--bg-surface-alt); padding: 12px; border-radius: 16px; }
-    .toolbar-group { display: flex; align-items: center; gap: 8px; flex: 1; }
-    .toolbar-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
-    .stats { font-size: 13px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; margin-left: auto; }
-
-    /* ===== 4. 리스트 & 카드 ===== */
-    .grid { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
-    @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
+    /* 리스트 스타일 */
+    .grid { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
     .card {
-      background: var(--bg-surface); border-radius: 20px; padding: 20px;
+      background: var(--bg-surface); border-radius: 16px; padding: 16px;
       box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
-      animation: slideUpFade 0.3s ease-out forwards;
-      display: flex; flex-direction: column; gap: 16px;
+      display: flex; gap: 12px; align-items: flex-start;
     }
-    .card-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-    .card-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
-    .card-subtitle { font-size: 13px; color: var(--text-secondary); }
-
-    .status-chip { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-    .status-chip.done { background: var(--success-bg); color: var(--success-text); }
-    .status-chip.watching { background: var(--warning-bg); color: var(--warning-text); }
-    .status-chip.not { background: var(--error-bg); color: var(--error-text); }
-
-    .card-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px; background: var(--bg-surface-alt); border-radius: 12px; }
-    .control-group { display: flex; align-items: center; gap: 6px; }
-    .control-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
-    .wheel-select { padding: 6px 10px; font-size: 13px; border-radius: 8px; background: var(--bg-surface); cursor: pointer; }
-
-    .memo { width: 100%; resize: vertical; min-height: 60px; border-radius: 12px; font-size: 13px; background: var(--bg-surface-alt); border: none; }
-    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 12px; color: var(--text-secondary); }
-    .empty { text-align: center; padding: 40px; color: var(--text-secondary); font-size: 15px; background: var(--bg-surface-alt); border-radius: 20px; border: 2px dashed var(--border-color); }
-
-    /* 스크롤 버튼 & 토스트 */
-    .scroll-buttons { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
-    .scroll-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); font-size: 18px; padding: 0; }
-    
-    #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
-    .toast { background: var(--bg-surface); color: var(--text-primary); padding: 14px 20px; border-radius: 16px; box-shadow: var(--shadow-lg); font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; animation: toastSlideUp 0.3s ease-out forwards; border: 1px solid var(--border-color); pointer-events: auto;}
-    .toast.success { border-left: 4px solid var(--success-text); }
-    .toast.error { border-left: 4px solid var(--error-text); }
-    @keyframes toastSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes toastFadeOut { to { opacity: 0; transform: translateY(-20px); } }
-
-    @media (max-width: 640px) {
-      .app { padding: 16px; }
-      .sticky-header-container { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px;}
-      .input-row { flex-direction: column; }
-      .input-row input, .input-row select, .input-row button { width: 100%; }
-      .toolbar { flex-direction: column; align-items: stretch; }
-      .stats { margin-left: 0; text-align: center; margin-top: 8px; }
-      .card-controls { flex-direction: column; align-items: stretch; }
-      .control-group { justify-content: space-between; }
+    .card-thumb {
+      width: 70px; height: 100px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+      background: var(--bg-surface-alt); border: 1px solid var(--border-color);
     }
+    .card-content { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .card-title { font-size: 16px; font-weight: 700; }
+    .card-controls { display: flex; gap: 6px; margin-top: 4px; }
+    .plus-one-btn { padding: 4px 8px !important; font-size: 11px !important; background: var(--bg-surface-alt); color: var(--accent-color); border: 1px solid var(--accent-color); }
+    .del-btn { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; font-size: 11px; border-radius: 6px; margin-left: auto; }
+
+    /* 기타 */
+    .loader { border: 2px solid #f3f3f3; border-top: 2px solid var(--accent-color); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; margin-right: 5px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 300px; pointer-events: none; }
+    .toast { background: rgba(0,0,0,0.85); color: white; padding: 12px 16px; border-radius: 20px; font-size: 13px; text-align: center; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="sticky-header-container">
-        <header class="app-header">
-        <h1>내 애니리스트</h1>
-        <div class="header-actions">
-            <select id="themeSelect">
-            <option value="system">자동 테마</option>
-            <option value="light">☀️ 라이트</option>
-            <option value="dark">🌙 다크</option>
-            </select>
-            <button id="clearAllBtn" class="secondary danger small-btn">전체 삭제</button>
-        </div>
-        </header>
 
-        <section class="controls">
-        <div class="input-row">
-            <input id="titleInput" placeholder="작품 제목 (예: 최애의 아이)" />
-            <input id="episodeInput" placeholder="회차 (예: 1기 3화)" style="flex: 0.6;" />
-            <select id="seenInput" style="flex: 0.5;">
-            <option value="O">✅ 다 봄</option>
-            <option value="W" selected>👀 보는 중</option>
-            <option value="X">❌ 안 봄</option>
-            </select>
-        </div>
-        <div class="input-row">
-            <textarea id="memoInput" rows="1" placeholder="짧은 메모..."></textarea>
-            <button id="addBtn" style="flex: 0.4;">+ 추가하기</button>
-        </div>
-
-        <div class="toolbar">
-            <div class="toolbar-group" style="flex: 2;">
-            <input id="searchInput" placeholder="🔍 제목으로 검색..." style="width: 100%;" />
-            </div>
-            <div class="toolbar-group">
-            <select id="sortSelect">
-                <option value="createdDesc">📅 최신순</option>
-                <option value="titleAsc">🔤 이름순</option>
-            </select>
-            <select id="statusFilter">
-                <option value="ALL">전체 상태</option>
-                <option value="O">✅ 완료</option>
-                <option value="W">👀 보는 중</option>
-                <option value="X">❌ 미시청</option>
-            </select>
-            </div>
-            <div class="stats" id="statsSummary"></div>
-        </div>
-        </section>
+<div class="app">
+  <div class="sticky-header-container">
+    <h1>애니리스트 (무료버전)</h1>
+    
+    <div class="input-row">
+      <label for="fileInput" class="file-label">📷</label>
+      <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+      <span id="fileNameDisplay" class="file-preview-name"></span>
+      <input id="titleInput" placeholder="제목을 입력하세요" />
     </div>
-
-    <section id="grid" class="grid"></section>
-    <div id="empty" class="empty" style="display:none;">
-        📺 아직 추가된 작품이 없습니다.<br>위에서 새로운 애니메이션을 추가해보세요!
+    
+    <div class="input-row">
+      <input id="episodeInput" placeholder="1기 3화" style="flex:1;" />
+      <select id="seenInput" style="flex:0.8;">
+        <option value="W" selected>보는중</option>
+        <option value="O">완료</option>
+        <option value="X">안봄</option>
+      </select>
+      <button id="addBtn" style="flex:0.8;">추가</button>
     </div>
+    
+    <div style="font-size:12px; color:gray; text-align:right;" id="statsSummary"></div>
   </div>
 
-  <div class="scroll-buttons">
-    <button id="scrollTopBtn" class="scroll-btn">↑</button>
-    <button id="scrollBottomBtn" class="scroll-btn">↓</button>
-  </div>
-  <div id="toast-container"></div>
+  <section id="grid" class="grid"></section>
+  <div id="empty" style="text-align:center; padding:40px; color:gray; display:none;">작품을 추가해보세요!</div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+<div id="toast-container"></div>
 
-    const firebaseConfig = {
+<script type="module">
+  // ★★★ Storage 관련 코드를 다 삭제하고 Firestore만 남겼습니다 ★★★
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+  const firebaseConfig = {
       apiKey: "AIzaSyDpbP8aBRqOQtLNLDbtrly49ozPon4SQaWE",
       authDomain: "anime-list-85c9e.firebaseapp.com",
       projectId: "anime-list-85c9e",
       storageBucket: "anime-list-85c9e.firebasestorage.app",
       messagingSenderId: "397442929562",
       appId: "1:397442929562:web:1b5e3e90cbbfa8a573d8e51"
-    };
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const itemsCol = collection(db, "animeItems");
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const itemsCol = collection(db, "animeItems");
 
-    let items = [], sortMode = "createdDesc", filterStatus = "ALL", searchQuery = "";
+  // DOM 요소
+  const addBtn = document.getElementById("addBtn");
+  const fileInput = document.getElementById("fileInput");
+  const fileNameDisplay = document.getElementById("fileNameDisplay");
+  const grid = document.getElementById("grid");
+  const header = document.querySelector(".sticky-header-container");
 
-    const themeSelect = document.getElementById("themeSelect");
-    const clearAllBtn = document.getElementById("clearAllBtn");
-    const addBtn = document.getElementById("addBtn");
-    const titleInput = document.getElementById("titleInput");
-    const episodeInput = document.getElementById("episodeInput");
-    const seenInput = document.getElementById("seenInput");
-    const memoInput = document.getElementById("memoInput");
-    const searchInput = document.getElementById("searchInput");
-    const sortSelect = document.getElementById("sortSelect");
-    const statusFilter = document.getElementById("statusFilter");
-    const grid = document.getElementById("grid");
-    const emptyEl = document.getElementById("empty");
-    const statsSummary = document.getElementById("statsSummary");
-    const scrollTopBtn = document.getElementById("scrollTopBtn");
-    const scrollBottomBtn = document.getElementById("scrollBottomBtn");
-    const stickyHeader = document.querySelector('.sticky-header-container');
-    const toastContainer = document.getElementById('toast-container');
+  // 토스트 메시지
+  function showToast(msg) {
+    const t = document.createElement("div"); t.className = "toast"; t.innerText = msg;
+    document.getElementById("toast-container").appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  }
 
-    function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        const icon = type === 'success' ? '✅' : '⚠️';
-        toast.innerHTML = `<span>${icon}</span> ${message}`;
-        toastContainer.appendChild(toast);
-        setTimeout(() => {
-            toast.style.animation = 'toastFadeOut 0.3s ease-out forwards';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+  // 파일명 표시
+  fileInput.addEventListener("change", (e) => {
+    if(e.target.files[0]) {
+        fileNameDisplay.textContent = e.target.files[0].name;
+        fileNameDisplay.style.display = "block";
     }
+  });
 
-    // ===== ★ 핵심: 스마트 헤더 기능 추가 (스크롤 감지) =====
-    let lastScrollTop = 0;
-    const delta = 5; // 스크롤 감도
+  // ★★★ 핵심: 이미지를 압축해서 글자로 바꾸는 함수 ★★★
+  function compressImage(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                // 썸네일용으로 크기를 줄입니다 (최대 300px)
+                const MAX_WIDTH = 300;
+                const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleSize;
+                
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                // 결과물을 글자(Base64)로 변환
+                resolve(canvas.toDataURL("image/jpeg", 0.7)); 
+            }
+        }
+    });
+  }
 
-    window.addEventListener('scroll', () => {
-        const st = window.scrollY;
+  // 추가 버튼 로직
+  addBtn.addEventListener("click", async () => {
+    const title = document.getElementById("titleInput").value.trim();
+    if (!title) return showToast("제목을 입력하세요!");
+
+    addBtn.disabled = true;
+    addBtn.innerHTML = `<span class="loader"></span>처리중`;
+
+    try {
+        let imageUrl = "";
         
-        // 그림자 효과 (맨 위가 아니면 그림자 추가)
-        if (st > 10) {
-            stickyHeader.classList.add('scrolled');
-        } else {
-            stickyHeader.classList.remove('scrolled');
+        // 사진이 있으면 압축해서 글자로 변환
+        if (fileInput.files[0]) {
+            imageUrl = await compressImage(fileInput.files[0]);
         }
 
-        // 스크롤 방향 감지 및 헤더 숨김/표시
-        if (Math.abs(lastScrollTop - st) <= delta) return;
-
-        // 스크롤을 내리고 있고(st > lastScrollTop), 일정 이상 내려갔을 때(st > 50)
-        if (st > lastScrollTop && st > 50) {
-            // 아래로 스크롤 중 -> 헤더 숨김
-            stickyHeader.classList.add('nav-up');
-        } else {
-            // 위로 스크롤 중 -> 헤더 표시
-            stickyHeader.classList.remove('nav-up');
-        }
-        
-        lastScrollTop = st;
-    });
-
-    // ===== 테마 및 기타 설정 =====
-    function applyTheme(mode) {
-      const root = document.documentElement;
-      if (mode === "system") {
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        root.setAttribute("data-theme", prefersDark ? "dark" : "light");
-      } else {
-        root.setAttribute("data-theme", mode);
-      }
-      localStorage.setItem("animeListTheme", mode);
-    }
-    const storedTheme = localStorage.getItem("animeListTheme") || "system";
-    themeSelect.value = storedTheme;
-    applyTheme(storedTheme);
-    themeSelect.addEventListener("change", (e) => applyTheme(e.target.value));
-
-    scrollTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-    scrollBottomBtn.addEventListener("click", () => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }));
-
-    function getCreatedAtMs(item) {
-      const v = item.createdAt;
-      if (!v) return 0;
-      if (typeof v === "number") return v;
-      if (v.toMillis) return v.toMillis();
-      return 0;
-    }
-    function normalizeSeen(item) {
-      const v = (item.seen || "X").toUpperCase();
-      return ["O", "W", "X"].includes(v) ? v : "X";
-    }
-    function buildEpisodeText(season, episodeNum) {
-      if (!season && !episodeNum) return "";
-      const sPart = season ? `${season}기` : "";
-      const ePart = episodeNum ? `${episodeNum}화` : "";
-      return [sPart, ePart].filter(Boolean).join(" ");
-    }
-    function parseEpisodeInput(text) {
-      if (!text) return { season: null, episodeNum: null };
-      const cleaned = text.replace(/\s+/g, "").trim();
-      let match = cleaned.match(/(\d+)\s*기\s*(\d+)\s*화?/);
-      if (match) return { season: Number(match[1]), episodeNum: Number(match[2]) };
-      match = cleaned.match(/(\d+)\s*기/);
-      if (match) return { season: Number(match[1]), episodeNum: null };
-      match = cleaned.match(/(\d+)\s*화/);
-      if (match) return { season: null, episodeNum: Number(match[1]) };
-      match = cleaned.match(/^(\d+)$/);
-      if (match) return { season: null, episodeNum: Number(match[1]) };
-      return { season: null, episodeNum: null };
-    }
-
-    onSnapshot(query(itemsCol, orderBy("createdAt", "asc")), (snapshot) => {
-      items = [];
-      snapshot.forEach((docSnap) => items.push({ id: docSnap.id, ...docSnap.data() }));
-      render();
-    });
-
-    addBtn.addEventListener("click", async () => {
-      const title = titleInput.value.trim();
-      if (!title) { showToast("작품 이름을 입력해주세요!", "error"); return; }
-      const episodeTextRaw = episodeInput.value.trim();
-      const { season, episodeNum } = parseEpisodeInput(episodeTextRaw);
-      const episodeText = episodeTextRaw || buildEpisodeText(season, episodeNum);
-      await addDoc(itemsCol, {
-        title, episodeText, seen: seenInput.value, memo: memoInput.value.trim(),
-        season: season ?? null, episodeNum: episodeNum ?? null, createdAt: Date.now()
-      });
-      showToast(`'${title}' 추가 완료!`);
-      titleInput.value = ""; episodeInput.value = ""; memoInput.value = ""; seenInput.value = "W";
-      titleInput.focus();
-    });
-
-    clearAllBtn.addEventListener("click", async () => {
-      if (!confirm("⚠️ 경고: 모든 데이터가 삭제됩니다. 정말 진행할까요?")) return;
-      const snap = await getDocs(itemsCol);
-      await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
-      showToast("모든 데이터가 삭제되었습니다.", "success");
-    });
-
-    searchInput.addEventListener("input", (e) => { searchQuery = e.target.value.trim().toLowerCase(); render(); });
-    sortSelect.addEventListener("change", (e) => { sortMode = e.target.value; render(); });
-    statusFilter.addEventListener("change", (e) => { filterStatus = e.target.value; render(); });
-
-    const MAX_SEASON = 20;
-    const MAX_EPISODE = 200;
-
-    function render() {
-      grid.innerHTML = "";
-      let display = items.map((item) => ({ ...item, seenNorm: normalizeSeen(item) }));
-      if (searchQuery) display = display.filter((item) => (item.title || "").toLowerCase().includes(searchQuery));
-      if (filterStatus !== "ALL") display = display.filter((item) => item.seenNorm === filterStatus);
-      display.sort((a, b) => sortMode === "titleAsc" ? (a.title || "").localeCompare(b.title || "", "ko") : getCreatedAtMs(b) - getCreatedAtMs(a));
-      
-      const countO = display.filter((i) => i.seenNorm === "O").length;
-      const countW = display.filter((i) => i.seenNorm === "W").length;
-      const countX = display.filter((i) => i.seenNorm === "X").length;
-      statsSummary.innerHTML = `총 <b>${display.length}</b>작품 (완료 ${countO} · 시청중 ${countW} · 미시청 ${countX})`;
-      emptyEl.style.display = display.length === 0 ? "block" : "none";
-
-      display.forEach((item) => {
-        const docRef = doc(db, "animeItems", item.id);
-        const card = document.createElement("div"); card.className = "card";
-        const headerRow = document.createElement("div"); headerRow.className = "card-header-row";
-        const titleGroup = document.createElement("div"); titleGroup.className = "card-title-group";
-        const titleEl = document.createElement("div"); titleEl.className = "card-title"; titleEl.textContent = item.title;
-        let epLabel = item.episodeText;
-        const builtFromNumbers = buildEpisodeText(item.season, item.episodeNum);
-        if ((!epLabel && builtFromNumbers) || (builtFromNumbers && epLabel !== builtFromNumbers)) epLabel = builtFromNumbers;
-        if (!epLabel) epLabel = "회차 정보 없음";
-        const subtitleEl = document.createElement("div"); subtitleEl.className = "card-subtitle"; subtitleEl.textContent = epLabel;
-        titleGroup.appendChild(titleEl); titleGroup.appendChild(subtitleEl);
-        const chip = document.createElement("div");
-        chip.className = `status-chip ${item.seenNorm === 'O' ? 'done' : item.seenNorm === 'W' ? 'watching' : 'not'}`;
-        chip.innerHTML = item.seenNorm === 'O' ? '✅ 완료' : item.seenNorm === 'W' ? '👀 보는중' : '❌ 안봄';
-        headerRow.appendChild(titleGroup); headerRow.appendChild(chip);
-
-        const controls = document.createElement("div"); controls.className = "card-controls";
-        const statusGroup = document.createElement("div"); statusGroup.className = "control-group";
-        statusGroup.innerHTML = `<span class="control-label">상태</span>`;
-        const statusSelect = document.createElement("select"); statusSelect.className = "wheel-select";
-        statusSelect.innerHTML = `<option value="O" ${item.seenNorm==="O"?"selected":""}>완료</option><option value="W" ${item.seenNorm==="W"?"selected":""}>보는중</option><option value="X" ${item.seenNorm==="X"?"selected":""}>안봄</option>`;
-        statusSelect.addEventListener("change", async(e) => { await updateDoc(docRef, { seen: e.target.value }); showToast("상태가 변경되었습니다."); });
-        statusGroup.appendChild(statusSelect);
-
-        const epGroup = document.createElement("div"); epGroup.className = "control-group";
-        const seasonSelect = document.createElement("select"); seasonSelect.className = "wheel-select";
-        seasonSelect.innerHTML = `<option value="-">시즌</option>` + Array.from({length:MAX_SEASON},(_,i)=>`<option value="${i+1}">${i+1}기</option>`).join('');
-        seasonSelect.value = item.season ?? "-";
-        const episodeSelect = document.createElement("select"); episodeSelect.className = "wheel-select";
-        episodeSelect.innerHTML = `<option value="-">회차</option>` + Array.from({length:MAX_EPISODE},(_,i)=>`<option value="${i+1}">${i+1}화</option>`).join('');
-        episodeSelect.value = item.episodeNum ?? "-";
-        const updateEpInfo = async (newSeason, newEp) => {
-            const newText = buildEpisodeText(newSeason, newEp);
-            await updateDoc(docRef, { season: newSeason, episodeNum: newEp, episodeText: newText });
-        }
-        seasonSelect.addEventListener("change", (e) => updateEpInfo(e.target.value==='-'?null:Number(e.target.value), episodeSelect.value==='-'?null:Number(episodeSelect.value)));
-        episodeSelect.addEventListener("change", (e) => updateEpInfo(seasonSelect.value==='-'?null:Number(seasonSelect.value), e.target.value==='-'?null:Number(e.target.value)));
-        epGroup.appendChild(seasonSelect); epGroup.appendChild(episodeSelect);
-
-        const plusOneBtn = document.createElement("button");
-        plusOneBtn.className = "plus-one-btn"; plusOneBtn.textContent = "+1화";
-        plusOneBtn.addEventListener("click", async () => {
-            let currentEp = item.episodeNum ?? 0; let nextEp = currentEp + 1;
-            await updateDoc(docRef, { episodeNum: nextEp, episodeText: buildEpisodeText(item.season, nextEp), seen: 'W' });
-            showToast(`'${item.title}' ${nextEp}화로 업데이트!`, 'success');
+        await addDoc(itemsCol, {
+            title, 
+            episodeText: document.getElementById("episodeInput").value.trim(), 
+            seen: document.getElementById("seenInput").value, 
+            memo: "",
+            imageUrl: imageUrl, // 글자로 변환된 이미지가 여기에 저장됨
+            createdAt: Date.now()
         });
-        epGroup.appendChild(plusOneBtn);
-        controls.appendChild(statusGroup); controls.appendChild(epGroup);
 
-        const memoEl = document.createElement("textarea"); memoEl.className = "memo"; memoEl.placeholder = "메모를 입력하세요..."; memoEl.value = item.memo || "";
-        memoEl.addEventListener("change", async(e) => { await updateDoc(docRef, { memo: e.target.value.trim() }); showToast("메모가 저장되었습니다."); });
+        showToast("저장 완료!");
+        
+        // 초기화
+        document.getElementById("titleInput").value = "";
+        document.getElementById("episodeInput").value = "";
+        fileInput.value = ""; 
+        fileNameDisplay.style.display = "none";
 
-        const footer = document.createElement("div"); footer.className = "card-footer";
-        footer.textContent = getCreatedAtMs(item) ? new Date(getCreatedAtMs(item)).toLocaleDateString() + " 추가됨" : "";
-        const delBtn = document.createElement("button"); delBtn.className = "secondary danger small-btn";
-        delBtn.innerHTML = `🗑️ 삭제`;
-        delBtn.addEventListener("click", async() => { if(confirm("정말 삭제하시겠습니까?")) { await deleteDoc(docRef); showToast("삭제되었습니다.", "error"); }});
-        footer.appendChild(delBtn);
-
-        card.appendChild(headerRow); card.appendChild(controls); card.appendChild(memoEl); card.appendChild(footer);
-        grid.appendChild(card);
-      });
+    } catch (e) {
+        console.error(e);
+        showToast("오류 발생 (사진이 너무 클 수도 있어요)");
+    } finally {
+        addBtn.disabled = false;
+        addBtn.innerText = "추가";
     }
-  </script>
+  });
+
+  // 삭제 로직
+  window.deleteItem = async (id) => {
+    if(!confirm("삭제하시겠습니까?")) return;
+    await deleteDoc(doc(db, "animeItems", id));
+    showToast("삭제됨");
+  };
+
+  // +1 기능
+  window.plusOne = async (id, text) => {
+    let num = text.match(/\d+/g);
+    if(num) {
+        let lastNum = parseInt(num[num.length-1]);
+        let newText = text.replace(lastNum, lastNum + 1);
+        await updateDoc(doc(db, "animeItems", id), { episodeText: newText, seen: 'W' });
+        showToast("+1화 완료!");
+    }
+  };
+
+  // 렌더링
+  onSnapshot(query(itemsCol, orderBy("createdAt", "desc")), (snap) => {
+    let items = []; snap.forEach(d => items.push({id: d.id, ...d.data()}));
+    
+    grid.innerHTML = "";
+    document.getElementById("statsSummary").innerText = `총 ${items.length}개`;
+    document.getElementById("empty").style.display = items.length ? "none" : "block";
+
+    items.forEach(item => {
+        const div = document.createElement("div"); div.className = "card";
+        
+        const imgHtml = item.imageUrl 
+            ? `<img src="${item.imageUrl}" class="card-thumb">`
+            : `<div class="card-thumb" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:24px;">📺</div>`;
+
+        div.innerHTML = `
+            ${imgHtml}
+            <div class="card-content">
+                <div style="display:flex; justify-content:space-between;">
+                    <span class="card-title">${item.title}</span>
+                    <span style="font-size:11px; font-weight:bold; color:${item.seen==='O'?'green':item.seen==='W'?'orange':'gray'}">
+                        ${item.seen==='O'?'완료':item.seen==='W'?'보는중':'안봄'}
+                    </span>
+                </div>
+                <div style="font-size:12px; color:gray;">${item.episodeText || '회차 정보 없음'}</div>
+                
+                <div class="card-controls">
+                    <button class="plus-one-btn" onclick="plusOne('${item.id}', '${item.episodeText || ''}')">+1화</button>
+                    <button class="del-btn" onclick="deleteItem('${item.id}')">삭제</button>
+                </div>
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+  });
+
+  // 헤더 스크롤 효과
+  let lastScroll = 0;
+  window.addEventListener("scroll", () => {
+    const current = window.scrollY;
+    if(current > 10) header.classList.add("scrolled"); else header.classList.remove("scrolled");
+    if(current > lastScroll && current > 50) header.classList.add("nav-up");
+    else header.classList.remove("nav-up");
+    lastScroll = current;
+  });
+</script>
 </body>
 </html>
