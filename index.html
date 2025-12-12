@@ -2,454 +2,276 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>애니리스트</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>내 손안의 애니리스트</title>
 
-  <!-- iOS 홈화면 아이콘 (있으면 같은 폴더에 두기) -->
   <link rel="apple-touch-icon" href="icon_512.png" />
   <link rel="icon" type="image/png" href="icon_512.png" />
 
   <style>
+    /* ===== 1. 디자인 변수 선언 (다크/라이트 모드) ===== */
     :root[data-theme="light"] {
-      --bg: #f3f4f6;
-      --text: #111827;
-      --subtext: #4b5563;
-      --row-bg: #ffffff;
-      --border: #e5e7eb;
-      --accent: #38bdf8;
-      --danger: #f97373;
-      --status-done: #dcfce7;
-      --status-watching: #fef9c3;
-      --status-not: #fee2e2;
-      --chip-text: #111827;
+      --bg-app: #f8fafc; /* 더 밝고 깨끗한 배경 */
+      --bg-surface: #ffffff;
+      --bg-surface-alt: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --accent-color: #6366f1; /* 인디고 계열 엑센트 */
+      --accent-hover: #4f46e5;
+      --danger-color: #ef4444;
+      --success-bg: #dcfce7; --success-text: #166534;
+      --warning-bg: #fef9c3; --warning-text: #854d0e;
+      --error-bg: #fee2e2;   --error-text: #991b1b;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     }
 
     :root[data-theme="dark"] {
-      --bg: #020617;
-      --text: #e5e7eb;
-      --subtext: #9ca3af;
-      --row-bg: #020617;
-      --border: #1e293b;
-      --accent: #38bdf8;
-      --danger: #f97373;
-      --status-done: #14532d;
-      --status-watching: #78350f;
-      --status-not: #7f1d1d;
-      --chip-text: #f9fafb;
+      --bg-app: #0f172a; /* 깊은 네이비 배경 */
+      --bg-surface: #1e293b;
+      --bg-surface-alt: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border-color: #334155;
+      --accent-color: #818cf8;
+      --accent-hover: #a5b4fc;
+      --danger-color: #f87171;
+      --success-bg: #052e16; --success-text: #4ade80;
+      --warning-bg: #422006; --warning-text: #fde047;
+      --error-bg: #450a0a;   --error-text: #f87171;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
     }
 
-    * { box-sizing: border-box; }
-
+    /* ===== 2. 기본 스타일 리셋 ===== */
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      padding: 20px;
-      margin: 0;
-      background: radial-gradient(circle at top, #0f172a 0, var(--bg) 45%);
-      color: var(--text);
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      padding: 0; margin: 0;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      overflow-x: hidden; /* 가로 스크롤 방지 */
+    }
+    .app { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
+
+    /* ===== 3. 상단 고정 헤더 & 컨트롤 영역 (Sticky Header) ===== */
+    .sticky-header-container {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--bg-app); /* 배경색을 지정해야 뒤가 안 비침 */
+      padding-top: 20px;
+      padding-bottom: 10px;
+      margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; /* 전체 너비 적용 */
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    /* 스크롤 시 헤더에 그림자 추가를 위한 클래스 (JS로 제어) */
+    .sticky-header-container.scrolled {
+        border-bottom-color: var(--border-color);
+        box-shadow: var(--shadow-sm);
+        background-color: var(--bg-surface); /* 스크롤 시 약간 밝게 */
     }
 
-    .app { max-width: 980px; margin: 0 auto; }
-
-    /* ===== 제목 영역 ===== */
     .app-header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 18px;
-      text-align: center;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
     }
+    h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .header-actions { display: flex; gap: 8px; }
 
-    h1 {
-      margin: 0;
-      font-size: 26px;
-      letter-spacing: 0.08em;
+    /* 입력창 및 도구 모음 스타일 */
+    .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .input-row input { flex: 1; } /* 제목 입력창이 남은 공간 차지 */
+
+    /* 공통 입력 요소 스타일 */
+    input, select, button, textarea {
+      font-family: inherit; font-size: 14px; padding: 10px 14px;
+      border-radius: 12px; border: 1px solid var(--border-color);
+      background: var(--bg-surface); color: var(--text-primary);
+      outline: none; transition: all 0.2s ease;
     }
+    input::placeholder, textarea::placeholder { color: var(--text-secondary); opacity: 0.7; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
 
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .badge {
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      color: var(--subtext);
-    }
-
-    /* ===== 입력 / 필터 영역 ===== */
-    .controls { margin-bottom: 12px; }
-
-    .input-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-
-    input,
-    select,
-    button,
-    textarea {
-      font-size: 13px;
-      padding: 6px 9px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--row-bg);
-      color: var(--text);
-      outline: none;
-    }
-
-    textarea {
-      border-radius: 10px;
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-      color: var(--subtext);
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
-    }
-
+    /* 버튼 스타일 */
     button {
-      cursor: pointer;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, #38bdf8, #6366f1);
-      color: #f9fafb;
-      padding-inline: 14px;
-      font-weight: 500;
-      white-space: nowrap;
-      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, opacity 0.12s;
+      cursor: pointer; font-weight: 600; border: none;
+      background: var(--accent-color); color: white;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    button:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    button.secondary { background: var(--bg-surface-alt); color: var(--text-secondary); border: 1px solid var(--border-color); }
+    button.secondary:hover { background: var(--border-color); color: var(--text-primary); }
+    button.danger { background: #fee2e2; color: var(--danger-color); border: 1px solid #fecaca; }
+    button.danger:hover { background: var(--danger-color); color: white; border-color: var(--danger-color); }
+    button.icon-btn { padding: 8px; border-radius: 50%; aspect-ratio: 1; } /* 아이콘 버튼 */
+    
+    /* +1 버튼 스타일 */
+    .plus-one-btn {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+        background: var(--bg-surface-alt) !important;
+        color: var(--accent-color) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+    }
+    .plus-one-btn:hover {
+        background: var(--accent-color) !important;
+        color: white !important;
+        border-color: var(--accent-color) !important;
     }
 
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.5);
-      opacity: 0.95;
-    }
 
-    button.secondary {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--subtext);
-      box-shadow: none;
-    }
-    button.secondary:hover {
-      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.4);
-      background: rgba(148, 163, 184, 0.1);
-    }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; background: var(--bg-surface-alt); padding: 12px; border-radius: 16px; }
+    .toolbar-group { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .toolbar-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+    .toolbar-group input, .toolbar-group select { padding: 8px 12px; font-size: 13px; }
+    .stats { font-size: 13px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; margin-left: auto; }
 
-    button.danger { background: #b91c1c; }
-
-    button.small-btn { padding: 3px 8px; font-size: 11px; }
-
-    .theme-select { font-size: 12px; padding: 4px 10px; }
-
-    .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 4px;
-    }
-
-    .toolbar-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .toolbar label {
-      font-size: 11px;
-      color: var(--subtext);
-    }
-
-    .stats {
-      font-size: 12px;
-      color: var(--subtext);
-    }
-
-    /* ===== 리스트 형식 + 애니메이션 ===== */
-    .grid {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    /* ===== 4. 카드 리스트 영역 (디자인 개선) ===== */
+    .grid { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+    
+    /* 카드 등장 애니메이션 */
+    @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     .card {
-      display: grid;
-      grid-template-columns: minmax(0, 2.6fr) minmax(0, 2.2fr) minmax(0, 1.4fr);
-      gap: 4px 12px;
-      align-items: center;
-      padding: 8px 12px;
-      background: var(--row-bg);
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.45);
-      animation: fadeInUp 0.22s ease-out;
-      transition: transform 0.14s ease-out, box-shadow 0.14s ease-out, background-color 0.18s;
+      background: var(--bg-surface);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
+      animation: slideUpFade 0.3s ease-out forwards;
+      display: flex; flex-direction: column; gap: 16px; /* Flex Column 기반 */
+      transition: all 0.2s ease;
     }
+    .card:hover { box-shadow: var(--shadow-md); border-color: var(--accent-color); transform: translateY(-2px); }
 
-    .card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.7);
-      background-color: rgba(15, 23, 42, 0.9);
-    }
+    /* 카드 상단: 제목, 상태 칩 */
+    .card-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .card-title-group { flex: 1; }
+    .card-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+    .card-subtitle { font-size: 13px; color: var(--text-secondary); }
 
-    .card-header {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
+    /* 상태 칩 디자인 */
+    .status-chip { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+    .status-chip.done { background: var(--success-bg); color: var(--success-text); }
+    .status-chip.watching { background: var(--warning-bg); color: var(--warning-text); }
+    .status-chip.not { background: var(--error-bg); color: var(--error-text); }
 
-    .card-title {
-      font-size: 15px;
-      font-weight: 600;
-      word-break: keep-all;
-    }
+    /* 카드 중단: 컨트롤 (상태, 시즌, 회차) */
+    .card-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px; background: var(--bg-surface-alt); border-radius: 12px; }
+    .control-group { display: flex; align-items: center; gap: 6px; }
+    .control-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+    .wheel-select { padding: 6px 10px; font-size: 13px; border-radius: 8px; background: var(--bg-surface); cursor: pointer; }
 
-    .card-meta {
-      font-size: 12px;
-      color: var(--subtext);
-    }
+    /* 카드 메모 */
+    .memo { width: 100%; resize: vertical; min-height: 60px; border-radius: 12px; font-size: 13px; background: var(--bg-surface-alt); border: none; }
+    .memo:focus { background: var(--bg-surface); border: 1px solid var(--accent-color); }
 
-    .status-chip {
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--chip-text);
-      white-space: nowrap;
-      border: 1px solid transparent;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      margin-bottom: 4px;
-    }
-    .status-chip.done {
-      background: var(--status-done);
-      border-color: rgba(34, 197, 94, 0.4);
-    }
-    .status-chip.watching {
-      background: var(--status-watching);
-      border-color: rgba(245, 158, 11, 0.5);
-    }
-    .status-chip.not {
-      background: var(--status-not);
-      border-color: rgba(248, 113, 113, 0.6);
-    }
+    /* 카드 하단: 날짜, 삭제 버튼 */
+    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 12px; color: var(--text-secondary); }
+    
+    /* 빈 상태 메시지 */
+    .empty { text-align: center; padding: 40px; color: var(--text-secondary); font-size: 15px; background: var(--bg-surface-alt); border-radius: 20px; border: 2px dashed var(--border-color); }
 
-    .status-select-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 2px;
-    }
+    /* ===== 5. 기타 UI 요소 (스크롤 버튼, 토스트 알림) ===== */
+    .scroll-buttons { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
+    .scroll-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); font-size: 18px; padding: 0; }
+    .scroll-btn:hover { background: var(--accent-color); color: white; border-color: transparent; }
 
-    .pill {
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.2);
-      font-size: 11px;
-      color: var(--subtext);
-      white-space: nowrap;
-    }
+    /* 토스트 알림창 스타일 */
+    #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
+    .toast { background: var(--bg-surface); color: var(--text-primary); padding: 14px 20px; border-radius: 16px; box-shadow: var(--shadow-lg); font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; animation: toastSlideUp 0.3s ease-out forwards; border: 1px solid var(--border-color); pointer-events: auto;}
+    .toast.success { border-left: 4px solid var(--success-text); }
+    .toast.error { border-left: 4px solid var(--error-text); }
+    @keyframes toastSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastFadeOut { to { opacity: 0; transform: translateY(-20px); } }
 
-    .memo {
-      font-size: 13px;
-      min-height: 18px;
-      color: var(--subtext);
-      padding: 4px 8px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.35);
-      width: 100%;
-      resize: vertical;
-      margin-top: 6px;
-    }
-
-    .memo:focus {
-      border-color: var(--accent);
-      outline: none;
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
-    }
-
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* 회차 / 시즌 편집 영역 */
-    .episode-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 4px;
-      flex-wrap: wrap;
-    }
-
-    .episode-label {
-      font-size: 11px;
-      color: var(--subtext);
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.18);
-    }
-
-    .wheel-select {
-      padding: 4px 10px;
-      font-size: 12px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .empty {
-      margin-top: 16px;
-      font-size: 13px;
-      color: var(--subtext);
-      text-align: center;
-    }
-
-    /* 스크롤 버튼 */
-    .scroll-buttons {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 50;
-    }
-    .scroll-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.9);
-      color: #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 18px;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.7);
-    }
-    .scroll-btn:hover {
-      transform: translateY(-1px);
-      background: rgba(30, 64, 175, 0.9);
-    }
-
-    @media (max-width: 720px) {
-      .card {
-        grid-template-columns: 1fr;
-        align-items: flex-start;
-      }
-      .card-footer {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+    /* 모바일 대응 */
+    @media (max-width: 640px) {
+      .app { padding: 16px; }
+      .sticky-header-container { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px;}
+      .input-row { flex-direction: column; }
+      .input-row input, .input-row select, .input-row button { width: 100%; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .stats { margin-left: 0; text-align: center; margin-top: 8px; }
+      .card-controls { flex-direction: column; align-items: stretch; }
+      .control-group { justify-content: space-between; }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <header class="app-header">
-      <h1>애니리스트</h1>
-      <div class="header-actions">
-        <select id="themeSelect" class="theme-select">
-          <option value="dark">다크 모드</option>
-          <option value="light">라이트 모드</option>
-          <option value="system">시스템 자동</option>
-        </select>
-        <button id="clearAllBtn" class="danger small-btn">전체 삭제</button>
-      </div>
-    </header>
-
-    <section class="controls">
-      <div class="input-row">
-        <input id="titleInput" placeholder="작품 이름" />
-        <input id="episodeInput" placeholder="회차 (예: 1기 3화)" />
-        <select id="seenInput">
-          <option value="O">O · 다 봄</option>
-          <option value="W">△ · 보는 중</option>
-          <option value="X">X · 안 봄</option>
-        </select>
-        <input id="memoInput" placeholder="메모 (만화/애니/기타)" />
-        <button id="addBtn">+ 추가</button>
-      </div>
-
-      <div class="toolbar">
-        <div class="toolbar-group">
-          <label for="searchInput">제목 검색</label>
-          <input id="searchInput" placeholder="제목 검색" />
+    <div class="sticky-header-container">
+        <header class="app-header">
+        <h1>내 애니리스트</h1>
+        <div class="header-actions">
+            <select id="themeSelect">
+            <option value="system">자동 테마</option>
+            <option value="light">☀️ 라이트</option>
+            <option value="dark">🌙 다크</option>
+            </select>
+            <button id="clearAllBtn" class="secondary danger small-btn">전체 삭제</button>
         </div>
-        <div class="toolbar-group">
-          <label for="sortSelect">정렬</label>
-          <select id="sortSelect">
-            <option value="createdDesc">최근 추가순</option>
-            <option value="titleAsc">이름순 (가나다)</option>
-          </select>
-          <label for="statusFilter">상태</label>
-          <select id="statusFilter">
-            <option value="ALL">전체</option>
-            <option value="O">O · 다 봄</option>
-            <option value="W">△ · 보는 중</option>
-            <option value="X">X · 안 봄</option>
-          </select>
-        </div>
-        <div class="stats" id="statsSummary"></div>
-      </div>
-    </section>
+        </header>
 
-    <section id="grid" class="grid"></section>
-    <div id="empty" class="empty" style="display:none;">데이터가 없습니다. 위에서 작품을 추가해보세요.</div>
+        <section class="controls">
+        <div class="input-row">
+            <input id="titleInput" placeholder="작품 제목 (예: 최애의 아이)" />
+            <input id="episodeInput" placeholder="회차 (예: 1기 3화)" style="flex: 0.6;" /> <select id="seenInput" style="flex: 0.5;">
+            <option value="O">✅ 다 봄</option>
+            <option value="W" selected>👀 보는 중</option>
+            <option value="X">❌ 안 봄</option>
+            </select>
+        </div>
+        <div class="input-row">
+            <textarea id="memoInput" rows="1" placeholder="짧은 메모..."></textarea>
+            <button id="addBtn" style="flex: 0.4;">+ 추가하기</button>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-group" style="flex: 2;"> <input id="searchInput" placeholder="🔍 제목으로 검색..." style="width: 100%;" />
+            </div>
+            <div class="toolbar-group">
+            <select id="sortSelect">
+                <option value="createdDesc">📅 최신순</option>
+                <option value="titleAsc">🔤 이름순</option>
+            </select>
+            <select id="statusFilter">
+                <option value="ALL">전체 상태</option>
+                <option value="O">✅ 완료</option>
+                <option value="W">👀 보는 중</option>
+                <option value="X">❌ 미시청</option>
+            </select>
+            </div>
+            <div class="stats" id="statsSummary"></div>
+        </div>
+        </section>
+    </div> <section id="grid" class="grid"></section>
+    <div id="empty" class="empty" style="display:none;">
+        📺 아직 추가된 작품이 없습니다.<br>위에서 새로운 애니메이션을 추가해보세요!
+    </div>
   </div>
 
-  <!-- 스크롤 버튼 -->
   <div class="scroll-buttons">
-    <button id="scrollTopBtn" class="scroll-btn">▲</button>
-    <button id="scrollBottomBtn" class="scroll-btn">▼</button>
+    <button id="scrollTopBtn" class="scroll-btn">↑</button>
+    <button id="scrollBottomBtn" class="scroll-btn">↓</button>
   </div>
+
+  <div id="toast-container"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      onSnapshot,
-      query,
-      orderBy,
-      doc,
-      updateDoc,
-      deleteDoc,
-      getDocs
-    } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-    // ===== Firebase 설정 =====
+    // ===== Firebase 설정 (본인 것으로 유지) =====
     const firebaseConfig = {
       apiKey: "AIzaSyDpbP8aBRqOQtLNLDbtrly49ozPon4SQaWE",
       authDomain: "anime-list-85c9e.firebaseapp.com",
@@ -485,6 +307,36 @@
     const statsSummary = document.getElementById("statsSummary");
     const scrollTopBtn = document.getElementById("scrollTopBtn");
     const scrollBottomBtn = document.getElementById("scrollBottomBtn");
+    const stickyHeader = document.querySelector('.sticky-header-container');
+    const toastContainer = document.getElementById('toast-container');
+
+
+    // ===== 유틸리티 함수: 토스트 알림 표시 (새로 추가됨) =====
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        // 타입에 따른 아이콘 추가
+        const icon = type === 'success' ? '✅' : '⚠️';
+        toast.innerHTML = `<span>${icon}</span> ${message}`;
+        
+        toastContainer.appendChild(toast);
+
+        // 3초 후 제거 애니메이션 및 삭제
+        setTimeout(() => {
+            toast.style.animation = 'toastFadeOut 0.3s ease-out forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // ===== 스크롤 감지하여 헤더 스타일 변경 (새로 추가됨) =====
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 10) {
+            stickyHeader.classList.add('scrolled');
+        } else {
+            stickyHeader.classList.remove('scrolled');
+        }
+    });
+
 
     // ===== 테마 처리 =====
     function applyTheme(mode) {
@@ -497,25 +349,16 @@
       }
       localStorage.setItem("animeListTheme", mode);
     }
-
-    const storedTheme = localStorage.getItem("animeListTheme") || "dark";
+    const storedTheme = localStorage.getItem("animeListTheme") || "system";
     themeSelect.value = storedTheme;
     applyTheme(storedTheme);
-
-    themeSelect.addEventListener("change", (e) => {
-      applyTheme(e.target.value);
-    });
+    themeSelect.addEventListener("change", (e) => applyTheme(e.target.value));
 
     // ===== 스크롤 버튼 =====
-    scrollTopBtn.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-    scrollBottomBtn.addEventListener("click", () => {
-      const h = document.documentElement.scrollHeight || document.body.scrollHeight;
-      window.scrollTo({ top: h, behavior: "smooth" });
-    });
+    scrollTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    scrollBottomBtn.addEventListener("click", () => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }));
 
-    // ===== 유틸 =====
+    // ===== 데이터 파싱 유틸 =====
     function getCreatedAtMs(item) {
       const v = item.createdAt;
       if (!v) return 0;
@@ -523,337 +366,193 @@
       if (v.toMillis) return v.toMillis();
       return 0;
     }
-
     function normalizeSeen(item) {
       const v = (item.seen || "X").toUpperCase();
-      if (v === "O" || v === "W" || v === "X") return v;
-      return "X";
+      return ["O", "W", "X"].includes(v) ? v : "X";
     }
-
     function buildEpisodeText(season, episodeNum) {
       if (!season && !episodeNum) return "";
       const sPart = season ? `${season}기` : "";
       const ePart = episodeNum ? `${episodeNum}화` : "";
       return [sPart, ePart].filter(Boolean).join(" ");
     }
-
-    // "2기 24화", "1기", "3화" 같은 문자열에서 시즌/회차 뽑기
     function parseEpisodeInput(text) {
       if (!text) return { season: null, episodeNum: null };
-      const cleaned = text.replace(/\s+/g, "").trim(); // 공백 제거
-
-      // 둘 다 있는 경우 (예: 2기24화, 2기24)
+      const cleaned = text.replace(/\s+/g, "").trim();
       let match = cleaned.match(/(\d+)\s*기\s*(\d+)\s*화?/);
-      if (match) {
-        return { season: Number(match[1]), episodeNum: Number(match[2]) };
-      }
-
-      // "2기" 만 있는 경우
+      if (match) return { season: Number(match[1]), episodeNum: Number(match[2]) };
       match = cleaned.match(/(\d+)\s*기/);
-      if (match) {
-        return { season: Number(match[1]), episodeNum: null };
-      }
-
-      // "24화" 만 있는 경우
+      if (match) return { season: Number(match[1]), episodeNum: null };
       match = cleaned.match(/(\d+)\s*화/);
-      if (match) {
-        return { season: null, episodeNum: Number(match[1]) };
-      }
-
-      // 그냥 숫자만 적은 경우 -> 회차로 간주
+      if (match) return { season: null, episodeNum: Number(match[1]) };
       match = cleaned.match(/^(\d+)$/);
-      if (match) {
-        return { season: null, episodeNum: Number(match[1]) };
-      }
-
+      if (match) return { season: null, episodeNum: Number(match[1]) };
       return { season: null, episodeNum: null };
     }
 
-    // ===== Firestore 실시간 구독 =====
-    const qRef = query(itemsCol, orderBy("createdAt", "asc"));
-    onSnapshot(qRef, (snapshot) => {
+    // ===== Firestore 구독 =====
+    onSnapshot(query(itemsCol, orderBy("createdAt", "asc")), (snapshot) => {
       items = [];
-      snapshot.forEach((docSnap) => {
-        items.push({ id: docSnap.id, ...docSnap.data() });
-      });
+      snapshot.forEach((docSnap) => items.push({ id: docSnap.id, ...docSnap.data() }));
       render();
     });
 
     // ===== 입력 이벤트 =====
     addBtn.addEventListener("click", async () => {
       const title = titleInput.value.trim();
+      if (!title) { showToast("작품 이름을 입력해주세요!", "error"); return; } // alert 대신 toast 사용
+
       const episodeTextRaw = episodeInput.value.trim();
-      const seen = seenInput.value;
-      const memo = memoInput.value.trim();
-
-      if (!title) {
-        alert("작품 이름을 입력해주세요!");
-        return;
-      }
-
       const { season, episodeNum } = parseEpisodeInput(episodeTextRaw);
-      const episodeText =
-        episodeTextRaw || buildEpisodeText(season, episodeNum);
+      const episodeText = episodeTextRaw || buildEpisodeText(season, episodeNum);
 
       await addDoc(itemsCol, {
-        title,
-        episodeText,
-        seen,
-        memo,
-        season: season ?? null,
-        episodeNum: episodeNum ?? null,
-        createdAt: Date.now()
+        title, episodeText, seen: seenInput.value, memo: memoInput.value.trim(),
+        season: season ?? null, episodeNum: episodeNum ?? null, createdAt: Date.now()
       });
+      
+      showToast(`'${title}' 추가 완료!`); // 성공 토스트 알림
 
-      titleInput.value = "";
-      episodeInput.value = "";
-      memoInput.value = "";
-      seenInput.value = "O";
+      titleInput.value = ""; episodeInput.value = ""; memoInput.value = ""; seenInput.value = "W"; // 기본값을 '보는중'으로 변경
+      titleInput.focus(); // 입력 후 다시 제목창에 포커스
     });
 
     clearAllBtn.addEventListener("click", async () => {
-      if (!confirm("정말 전체 삭제할까요?")) return;
+      if (!confirm("⚠️ 경고: 모든 데이터가 삭제됩니다. 정말 진행할까요?")) return;
       const snap = await getDocs(itemsCol);
-      const tasks = snap.docs.map((d) => deleteDoc(d.ref));
-      await Promise.all(tasks);
+      await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
+      showToast("모든 데이터가 삭제되었습니다.", "success");
     });
 
-    searchInput.addEventListener("input", (e) => {
-      searchQuery = e.target.value.trim().toLowerCase();
-      render();
-    });
+    searchInput.addEventListener("input", (e) => { searchQuery = e.target.value.trim().toLowerCase(); render(); });
+    sortSelect.addEventListener("change", (e) => { sortMode = e.target.value; render(); });
+    statusFilter.addEventListener("change", (e) => { filterStatus = e.target.value; render(); });
 
-    sortSelect.addEventListener("change", (e) => {
-      sortMode = e.target.value;
-      render();
-    });
-
-    statusFilter.addEventListener("change", (e) => {
-      filterStatus = e.target.value;
-      render();
-    });
-
-    // ===== 렌더링 =====
-    const MAX_SEASON = 10;
-    const MAX_EPISODE = 50;
+    // ===== 렌더링 (디자인 대폭 수정됨) =====
+    const MAX_SEASON = 20; // 시즌 최대값 증가
+    const MAX_EPISODE = 200; // 회차 최대값 증가
 
     function render() {
       grid.innerHTML = "";
+      let display = items.map((item) => ({ ...item, seenNorm: normalizeSeen(item) }));
 
-      let display = items.map((item) => ({
-        ...item,
-        seenNorm: normalizeSeen(item)
-      }));
+      if (searchQuery) display = display.filter((item) => (item.title || "").toLowerCase().includes(searchQuery));
+      if (filterStatus !== "ALL") display = display.filter((item) => item.seenNorm === filterStatus);
 
-      if (searchQuery) {
-        display = display.filter((item) =>
-          (item.title || "").toLowerCase().includes(searchQuery)
-        );
-      }
+      display.sort((a, b) => sortMode === "titleAsc" ? (a.title || "").localeCompare(b.title || "", "ko") : getCreatedAtMs(b) - getCreatedAtMs(a));
 
-      if (filterStatus !== "ALL") {
-        display = display.filter((item) => item.seenNorm === filterStatus);
-      }
-
-      // 정렬
-      display.sort((a, b) => {
-        if (sortMode === "titleAsc") {
-          return (a.title || "").localeCompare(b.title || "", "ko");
-        }
-        return getCreatedAtMs(b) - getCreatedAtMs(a);
-      });
-
-      // 통계
-      const total = display.length;
       const countO = display.filter((i) => i.seenNorm === "O").length;
       const countW = display.filter((i) => i.seenNorm === "W").length;
       const countX = display.filter((i) => i.seenNorm === "X").length;
+      statsSummary.innerHTML = `총 <b>${display.length}</b>작품 (완료 ${countO} · 시청중 ${countW} · 미시청 ${countX})`;
 
-      statsSummary.textContent =
-        `전체 ${total} · O ${countO} · △ ${countW} · X ${countX}`;
-
-      if (display.length === 0) {
-        emptyEl.style.display = "block";
-        return;
-      } else {
-        emptyEl.style.display = "none";
-      }
+      emptyEl.style.display = display.length === 0 ? "block" : "none";
 
       display.forEach((item) => {
-        const status = item.seenNorm;
         const docRef = doc(db, "animeItems", item.id);
+        const card = document.createElement("div"); card.className = "card";
 
-        const card = document.createElement("div");
-        card.className = "card";
-
-        /* --- 왼쪽: 제목/에피소드 --- */
-        const headerCol = document.createElement("div");
-        headerCol.className = "card-header";
-
-        const titleEl = document.createElement("div");
-        titleEl.className = "card-title";
-        titleEl.textContent = item.title || "";
-
-        const metaEl = document.createElement("div");
-        metaEl.className = "card-meta";
+        // --- 상단: 제목 및 상태 ---
+        const headerRow = document.createElement("div"); headerRow.className = "card-header-row";
+        
+        const titleGroup = document.createElement("div"); titleGroup.className = "card-title-group";
+        const titleEl = document.createElement("div"); titleEl.className = "card-title"; titleEl.textContent = item.title;
+        
+        // 회차 정보 표시 최적화
         let epLabel = item.episodeText;
         const builtFromNumbers = buildEpisodeText(item.season, item.episodeNum);
-        if (!epLabel && builtFromNumbers) epLabel = builtFromNumbers;
+        // 입력한 텍스트가 없고 숫자 정보만 있을 때, 또는 입력 텍스트와 숫자 정보가 다를 때 숫자 정보 우선 표시
+        if ((!epLabel && builtFromNumbers) || (builtFromNumbers && epLabel !== builtFromNumbers)) {
+             epLabel = builtFromNumbers;
+        }
         if (!epLabel) epLabel = "회차 정보 없음";
-        metaEl.textContent = epLabel;
 
-        headerCol.appendChild(titleEl);
-        headerCol.appendChild(metaEl);
-
-        /* --- 가운데: 상태/시즌/회차/메모 --- */
-        const middleCol = document.createElement("div");
+        const subtitleEl = document.createElement("div"); subtitleEl.className = "card-subtitle"; subtitleEl.textContent = epLabel;
+        titleGroup.appendChild(titleEl); titleGroup.appendChild(subtitleEl);
 
         const chip = document.createElement("div");
-        chip.className = "status-chip";
-        if (status === "O") chip.classList.add("done");
-        else if (status === "W") chip.classList.add("watching");
-        else chip.classList.add("not");
-        chip.textContent =
-          status === "O" ? "다 봄" :
-          status === "W" ? "보는 중" : "안 봄";
+        chip.className = `status-chip ${item.seenNorm === 'O' ? 'done' : item.seenNorm === 'W' ? 'watching' : 'not'}`;
+        chip.innerHTML = item.seenNorm === 'O' ? '✅ 완료' : item.seenNorm === 'W' ? '👀 보는중' : '❌ 안봄';
+        
+        headerRow.appendChild(titleGroup);
+        headerRow.appendChild(chip);
 
-        const statusRow = document.createElement("div");
-        statusRow.className = "status-select-row";
-        const pill = document.createElement("div");
-        pill.className = "pill";
-        pill.textContent = "상태";
-        const statusSelect = document.createElement("select");
-        statusSelect.className = "wheel-select";
-        statusSelect.innerHTML = `
-          <option value="O" ${status === "O" ? "selected" : ""}>O · 다 봄</option>
-          <option value="W" ${status === "W" ? "selected" : ""}>△ · 보는 중</option>
-          <option value="X" ${status === "X" ? "selected" : ""}>X · 안 봄</option>
-        `;
-        statusSelect.addEventListener("change", async (e) => {
-          const nv = e.target.value;
-          await updateDoc(docRef, { seen: nv });
+        // --- 중단: 컨트롤 (상태, 시즌, 회차) ---
+        const controls = document.createElement("div"); controls.className = "card-controls";
+        
+        // 상태 선택
+        const statusGroup = document.createElement("div"); statusGroup.className = "control-group";
+        statusGroup.innerHTML = `<span class="control-label">상태</span>`;
+        const statusSelect = document.createElement("select"); statusSelect.className = "wheel-select";
+        statusSelect.innerHTML = `<option value="O" ${item.seenNorm==="O"?"selected":""}>완료</option><option value="W" ${item.seenNorm==="W"?"selected":""}>보는중</option><option value="X" ${item.seenNorm==="X"?"selected":""}>안봄</option>`;
+        statusSelect.addEventListener("change", async(e) => {
+             await updateDoc(docRef, { seen: e.target.value });
+             showToast("상태가 변경되었습니다.");
         });
+        statusGroup.appendChild(statusSelect);
 
-        statusRow.appendChild(pill);
-        statusRow.appendChild(statusSelect);
+        // 시즌/회차 선택 (그룹으로 묶음)
+        const epGroup = document.createElement("div"); epGroup.className = "control-group";
+        // epGroup.innerHTML = `<span class="control-label">진도</span>`;
 
-        // 시즌/회차 셀렉트
-        const episodeRow = document.createElement("div");
-        episodeRow.className = "episode-row";
+        const seasonSelect = document.createElement("select"); seasonSelect.className = "wheel-select";
+        seasonSelect.innerHTML = `<option value="-">시즌</option>` + Array.from({length:MAX_SEASON},(_,i)=>`<option value="${i+1}">${i+1}기</option>`).join('');
+        seasonSelect.value = item.season ?? "-";
 
-        const epLabelEl = document.createElement("div");
-        epLabelEl.className = "episode-label";
-        epLabelEl.textContent = "시즌 / 회차";
+        const episodeSelect = document.createElement("select"); episodeSelect.className = "wheel-select";
+        episodeSelect.innerHTML = `<option value="-">회차</option>` + Array.from({length:MAX_EPISODE},(_,i)=>`<option value="${i+1}">${i+1}화</option>`).join('');
+        episodeSelect.value = item.episodeNum ?? "-";
 
-        const seasonSelect = document.createElement("select");
-        seasonSelect.className = "wheel-select";
-        seasonSelect.innerHTML = `<option value="-">시즌 없음</option>`;
-        for (let i = 1; i <= MAX_SEASON; i++) {
-          seasonSelect.innerHTML += `<option value="${i}">${i}기</option>`;
+        // 공통 업데이트 함수
+        const updateEpInfo = async (newSeason, newEp) => {
+            const newText = buildEpisodeText(newSeason, newEp);
+            await updateDoc(docRef, { season: newSeason, episodeNum: newEp, episodeText: newText });
+            // showToast("회차 정보가 업데이트되었습니다."); // 너무 자주 떠서 주석 처리
         }
-        if (item.season) {
-          seasonSelect.value = String(item.season);
-        } else {
-          seasonSelect.value = "-";
-        }
+        seasonSelect.addEventListener("change", (e) => updateEpInfo(e.target.value==='-'?null:Number(e.target.value), episodeSelect.value==='-'?null:Number(episodeSelect.value)));
+        episodeSelect.addEventListener("change", (e) => updateEpInfo(seasonSelect.value==='-'?null:Number(seasonSelect.value), e.target.value==='-'?null:Number(e.target.value)));
 
-        const episodeSelect = document.createElement("select");
-        episodeSelect.className = "wheel-select";
-        episodeSelect.innerHTML = `<option value="-">회차 없음</option>`;
-        for (let i = 1; i <= MAX_EPISODE; i++) {
-          episodeSelect.innerHTML += `<option value="${i}">${i}화</option>`;
-        }
-        if (item.episodeNum) {
-          episodeSelect.value = String(item.episodeNum);
-        } else {
-          episodeSelect.value = "-";
-        }
+        epGroup.appendChild(seasonSelect);
+        epGroup.appendChild(episodeSelect);
 
-        // 시즌 변경 → 시즌/회차/episodeText 동기화 & 자동 저장
-        seasonSelect.addEventListener("change", async (e) => {
-          const v = e.target.value;
-          const newSeason = v === "-" ? null : Number(v);
-
-          const epVal = episodeSelect.value;
-          const currentEp = epVal === "-" ? null : Number(epVal);
-
-          const newEpisodeText = buildEpisodeText(newSeason, currentEp);
-
-          await updateDoc(docRef, {
-            season: newSeason,
-            episodeNum: currentEp,
-            episodeText: newEpisodeText
-          });
+        // ★★★ [+1화 빠른 추가 버튼] - 핵심 기능 추가 ★★★
+        const plusOneBtn = document.createElement("button");
+        plusOneBtn.className = "plus-one-btn";
+        plusOneBtn.title = "다음 화로 변경 (+1)";
+        plusOneBtn.textContent = "+1화";
+        plusOneBtn.addEventListener("click", async () => {
+            let currentEp = item.episodeNum ?? 0; // 현재 회차가 없으면 0부터 시작
+            let nextEp = currentEp + 1;
+            // 상태도 '보는중'으로 자동 변경
+            await updateDoc(docRef, { 
+                episodeNum: nextEp, 
+                episodeText: buildEpisodeText(item.season, nextEp),
+                seen: 'W' 
+            });
+            showToast(`'${item.title}' ${nextEp}화로 업데이트!`, 'success');
         });
+        epGroup.appendChild(plusOneBtn);
 
-        // 회차 변경 → 시즌/회차/episodeText 동기화 & 자동 저장
-        episodeSelect.addEventListener("change", async (e) => {
-          const v = e.target.value;
-          const newEp = v === "-" ? null : Number(v);
 
-          const seasonVal = seasonSelect.value;
-          const currentSeason = seasonVal === "-" ? null : Number(seasonVal);
+        controls.appendChild(statusGroup);
+        controls.appendChild(epGroup);
 
-          const newEpisodeText = buildEpisodeText(currentSeason, newEp);
+        // --- 메모 및 하단 ---
+        const memoEl = document.createElement("textarea"); memoEl.className = "memo"; memoEl.placeholder = "메모를 입력하세요..."; memoEl.value = item.memo || "";
+        memoEl.addEventListener("change", async(e) => { await updateDoc(docRef, { memo: e.target.value.trim() }); showToast("메모가 저장되었습니다."); });
 
-          await updateDoc(docRef, {
-            season: currentSeason,
-            episodeNum: newEp,
-            episodeText: newEpisodeText
-          });
-        });
-
-        episodeRow.appendChild(epLabelEl);
-        episodeRow.appendChild(seasonSelect);
-        episodeRow.appendChild(episodeSelect);
-
-        // 메모 입력 (자동 저장)
-        const memoEl = document.createElement("textarea");
-        memoEl.className = "memo";
-        memoEl.rows = 2;
-        memoEl.placeholder = "메모를 적어보세요…";
-        memoEl.value = item.memo || "";
-        memoEl.addEventListener("change", async (e) => {
-          const val = e.target.value.trim();
-          await updateDoc(docRef, { memo: val });
-        });
-
-        middleCol.appendChild(chip);
-        middleCol.appendChild(statusRow);
-        middleCol.appendChild(episodeRow);
-        middleCol.appendChild(memoEl);
-
-        /* --- 오른쪽: 시간 + 삭제 --- */
-        const rightCol = document.createElement("div");
-        const footer = document.createElement("div");
-        footer.className = "card-footer";
-
-        const timeEl = document.createElement("div");
-        timeEl.className = "card-meta";
-        const ms = getCreatedAtMs(item);
-        if (ms) {
-          const date = new Date(ms);
-          timeEl.textContent = date.toLocaleString("ko-KR");
-        } else {
-          timeEl.textContent = "";
-        }
-
-        const delBtn = document.createElement("button");
-        delBtn.className = "secondary small-btn";
-        delBtn.textContent = "삭제";
-        delBtn.addEventListener("click", async () => {
-          if (!confirm("이 항목을 삭제할까요?")) return;
-          await deleteDoc(docRef);
-        });
-
-        footer.appendChild(timeEl);
+        const footer = document.createElement("div"); footer.className = "card-footer";
+        footer.textContent = getCreatedAtMs(item) ? new Date(getCreatedAtMs(item)).toLocaleDateString() + " 추가됨" : "";
+        
+        const delBtn = document.createElement("button"); delBtn.className = "secondary danger small-btn";
+        delBtn.innerHTML = `🗑️ 삭제`;
+        delBtn.addEventListener("click", async() => { if(confirm("정말 삭제하시겠습니까?")) { await deleteDoc(docRef); showToast("삭제되었습니다.", "error"); }});
         footer.appendChild(delBtn);
-        rightCol.appendChild(footer);
 
-        card.appendChild(headerCol);
-        card.appendChild(middleCol);
-        card.appendChild(rightCol);
-
+        card.appendChild(headerRow);
+        card.appendChild(controls);
+        card.appendChild(memoEl);
+        card.appendChild(footer);
         grid.appendChild(card);
       });
     }
