@@ -9,27 +9,27 @@
   <link rel="icon" type="image/png" href="icon_512.png" />
 
   <style>
-    /* ===== 1. 디자인 변수 선언 (다크/라이트 모드) ===== */
+    /* ===== 1. 디자인 변수 선언 ===== */
     :root[data-theme="light"] {
-      --bg-app: #f8fafc; /* 더 밝고 깨끗한 배경 */
+      --bg-app: #f8fafc;
       --bg-surface: #ffffff;
       --bg-surface-alt: #f1f5f9;
       --text-primary: #1e293b;
       --text-secondary: #64748b;
       --border-color: #e2e8f0;
-      --accent-color: #6366f1; /* 인디고 계열 엑센트 */
+      --accent-color: #6366f1;
       --accent-hover: #4f46e5;
       --danger-color: #ef4444;
       --success-bg: #dcfce7; --success-text: #166534;
       --warning-bg: #fef9c3; --warning-text: #854d0e;
       --error-bg: #fee2e2;   --error-text: #991b1b;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
     :root[data-theme="dark"] {
-      --bg-app: #0f172a; /* 깊은 네이비 배경 */
+      --bg-app: #0f172a;
       --bg-surface: #1e293b;
       --bg-surface-alt: #334155;
       --text-primary: #f1f5f9;
@@ -42,151 +42,123 @@
       --warning-bg: #422006; --warning-text: #fde047;
       --error-bg: #450a0a;   --error-text: #f87171;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
     }
 
-    /* ===== 2. 기본 스타일 리셋 ===== */
+    /* ===== 2. 기본 스타일 ===== */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       padding: 0; margin: 0;
       background-color: var(--bg-app);
       color: var(--text-primary);
       transition: background-color 0.3s ease, color 0.3s ease;
-      overflow-x: hidden; /* 가로 스크롤 방지 */
+      overflow-x: hidden;
     }
     .app { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
 
-    /* ===== 3. 상단 고정 헤더 & 컨트롤 영역 (Sticky Header) ===== */
+    /* ===== 3. 스마트 상단 헤더 (수정됨) ===== */
     .sticky-header-container {
       position: sticky;
       top: 0;
       z-index: 100;
-      background-color: var(--bg-app); /* 배경색을 지정해야 뒤가 안 비침 */
+      background-color: var(--bg-app);
       padding-top: 20px;
       padding-bottom: 10px;
-      margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; /* 전체 너비 적용 */
+      margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px;
       border-bottom: 1px solid transparent;
-      transition: border-color 0.3s, box-shadow 0.3s;
+      
+      /* ★ 중요: 부드러운 움직임을 위한 트랜지션 추가 */
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  background-color 0.3s, 
+                  box-shadow 0.3s;
     }
-    /* 스크롤 시 헤더에 그림자 추가를 위한 클래스 (JS로 제어) */
+
+    /* 위로 숨길 때 적용할 클래스 */
+    .sticky-header-container.nav-up {
+        transform: translateY(-100%); /* 자기 높이만큼 위로 이동 */
+    }
+
+    /* 스크롤 시 그림자 */
     .sticky-header-container.scrolled {
         border-bottom-color: var(--border-color);
         box-shadow: var(--shadow-sm);
-        background-color: var(--bg-surface); /* 스크롤 시 약간 밝게 */
+        background-color: var(--bg-surface); 
     }
 
     .app-header {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 16px;
     }
-    h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    h1 { margin: 0; font-size: 24px; font-weight: 800; background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .header-actions { display: flex; gap: 8px; }
 
-    /* 입력창 및 도구 모음 스타일 */
+    /* 입력창 및 도구 모음 */
     .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
-    .input-row input { flex: 1; } /* 제목 입력창이 남은 공간 차지 */
+    .input-row input { flex: 1; }
 
-    /* 공통 입력 요소 스타일 */
     input, select, button, textarea {
       font-family: inherit; font-size: 14px; padding: 10px 14px;
       border-radius: 12px; border: 1px solid var(--border-color);
       background: var(--bg-surface); color: var(--text-primary);
       outline: none; transition: all 0.2s ease;
     }
-    input::placeholder, textarea::placeholder { color: var(--text-secondary); opacity: 0.7; }
     input:focus, select:focus, textarea:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
 
-    /* 버튼 스타일 */
     button {
       cursor: pointer; font-weight: 600; border: none;
       background: var(--accent-color); color: white;
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     }
     button:hover { background: var(--accent-hover); transform: translateY(-1px); }
-    button:active { transform: translateY(0); }
-
     button.secondary { background: var(--bg-surface-alt); color: var(--text-secondary); border: 1px solid var(--border-color); }
-    button.secondary:hover { background: var(--border-color); color: var(--text-primary); }
     button.danger { background: #fee2e2; color: var(--danger-color); border: 1px solid #fecaca; }
-    button.danger:hover { background: var(--danger-color); color: white; border-color: var(--danger-color); }
-    button.icon-btn { padding: 8px; border-radius: 50%; aspect-ratio: 1; } /* 아이콘 버튼 */
     
-    /* +1 버튼 스타일 */
     .plus-one-btn {
-        padding: 6px 10px !important;
-        font-size: 12px !important;
-        background: var(--bg-surface-alt) !important;
-        color: var(--accent-color) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 8px !important;
-        font-weight: 700 !important;
+        padding: 6px 10px !important; font-size: 12px !important;
+        background: var(--bg-surface-alt) !important; color: var(--accent-color) !important;
+        border: 1px solid var(--border-color) !important; border-radius: 8px !important; font-weight: 700 !important;
     }
-    .plus-one-btn:hover {
-        background: var(--accent-color) !important;
-        color: white !important;
-        border-color: var(--accent-color) !important;
-    }
-
+    .plus-one-btn:hover { background: var(--accent-color) !important; color: white !important; }
 
     .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; background: var(--bg-surface-alt); padding: 12px; border-radius: 16px; }
     .toolbar-group { display: flex; align-items: center; gap: 8px; flex: 1; }
     .toolbar-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
-    .toolbar-group input, .toolbar-group select { padding: 8px 12px; font-size: 13px; }
     .stats { font-size: 13px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; margin-left: auto; }
 
-    /* ===== 4. 카드 리스트 영역 (디자인 개선) ===== */
+    /* ===== 4. 리스트 & 카드 ===== */
     .grid { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
-    
-    /* 카드 등장 애니메이션 */
     @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     .card {
-      background: var(--bg-surface);
-      border-radius: 20px;
-      padding: 20px;
+      background: var(--bg-surface); border-radius: 20px; padding: 20px;
       box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
       animation: slideUpFade 0.3s ease-out forwards;
-      display: flex; flex-direction: column; gap: 16px; /* Flex Column 기반 */
-      transition: all 0.2s ease;
+      display: flex; flex-direction: column; gap: 16px;
     }
-    .card:hover { box-shadow: var(--shadow-md); border-color: var(--accent-color); transform: translateY(-2px); }
-
-    /* 카드 상단: 제목, 상태 칩 */
     .card-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-    .card-title-group { flex: 1; }
     .card-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
     .card-subtitle { font-size: 13px; color: var(--text-secondary); }
 
-    /* 상태 칩 디자인 */
-    .status-chip { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+    .status-chip { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
     .status-chip.done { background: var(--success-bg); color: var(--success-text); }
     .status-chip.watching { background: var(--warning-bg); color: var(--warning-text); }
     .status-chip.not { background: var(--error-bg); color: var(--error-text); }
 
-    /* 카드 중단: 컨트롤 (상태, 시즌, 회차) */
     .card-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px; background: var(--bg-surface-alt); border-radius: 12px; }
     .control-group { display: flex; align-items: center; gap: 6px; }
     .control-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
     .wheel-select { padding: 6px 10px; font-size: 13px; border-radius: 8px; background: var(--bg-surface); cursor: pointer; }
 
-    /* 카드 메모 */
     .memo { width: 100%; resize: vertical; min-height: 60px; border-radius: 12px; font-size: 13px; background: var(--bg-surface-alt); border: none; }
-    .memo:focus { background: var(--bg-surface); border: 1px solid var(--accent-color); }
-
-    /* 카드 하단: 날짜, 삭제 버튼 */
     .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 12px; color: var(--text-secondary); }
-    
-    /* 빈 상태 메시지 */
     .empty { text-align: center; padding: 40px; color: var(--text-secondary); font-size: 15px; background: var(--bg-surface-alt); border-radius: 20px; border: 2px dashed var(--border-color); }
 
-    /* ===== 5. 기타 UI 요소 (스크롤 버튼, 토스트 알림) ===== */
+    /* 스크롤 버튼 & 토스트 */
     .scroll-buttons { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
     .scroll-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); font-size: 18px; padding: 0; }
-    .scroll-btn:hover { background: var(--accent-color); color: white; border-color: transparent; }
-
-    /* 토스트 알림창 스타일 */
+    
     #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
     .toast { background: var(--bg-surface); color: var(--text-primary); padding: 14px 20px; border-radius: 16px; box-shadow: var(--shadow-lg); font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; animation: toastSlideUp 0.3s ease-out forwards; border: 1px solid var(--border-color); pointer-events: auto;}
     .toast.success { border-left: 4px solid var(--success-text); }
@@ -194,7 +166,6 @@
     @keyframes toastSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes toastFadeOut { to { opacity: 0; transform: translateY(-20px); } }
 
-    /* 모바일 대응 */
     @media (max-width: 640px) {
       .app { padding: 16px; }
       .sticky-header-container { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px;}
@@ -225,7 +196,8 @@
         <section class="controls">
         <div class="input-row">
             <input id="titleInput" placeholder="작품 제목 (예: 최애의 아이)" />
-            <input id="episodeInput" placeholder="회차 (예: 1기 3화)" style="flex: 0.6;" /> <select id="seenInput" style="flex: 0.5;">
+            <input id="episodeInput" placeholder="회차 (예: 1기 3화)" style="flex: 0.6;" />
+            <select id="seenInput" style="flex: 0.5;">
             <option value="O">✅ 다 봄</option>
             <option value="W" selected>👀 보는 중</option>
             <option value="X">❌ 안 봄</option>
@@ -237,7 +209,8 @@
         </div>
 
         <div class="toolbar">
-            <div class="toolbar-group" style="flex: 2;"> <input id="searchInput" placeholder="🔍 제목으로 검색..." style="width: 100%;" />
+            <div class="toolbar-group" style="flex: 2;">
+            <input id="searchInput" placeholder="🔍 제목으로 검색..." style="width: 100%;" />
             </div>
             <div class="toolbar-group">
             <select id="sortSelect">
@@ -254,7 +227,9 @@
             <div class="stats" id="statsSummary"></div>
         </div>
         </section>
-    </div> <section id="grid" class="grid"></section>
+    </div>
+
+    <section id="grid" class="grid"></section>
     <div id="empty" class="empty" style="display:none;">
         📺 아직 추가된 작품이 없습니다.<br>위에서 새로운 애니메이션을 추가해보세요!
     </div>
@@ -264,14 +239,12 @@
     <button id="scrollTopBtn" class="scroll-btn">↑</button>
     <button id="scrollBottomBtn" class="scroll-btn">↓</button>
   </div>
-
   <div id="toast-container"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
-    // ===== Firebase 설정 (본인 것으로 유지) =====
     const firebaseConfig = {
       apiKey: "AIzaSyDpbP8aBRqOQtLNLDbtrly49ozPon4SQaWE",
       authDomain: "anime-list-85c9e.firebaseapp.com",
@@ -285,13 +258,8 @@
     const db = getFirestore(app);
     const itemsCol = collection(db, "animeItems");
 
-    // ===== 상태 =====
-    let items = [];
-    let sortMode = "createdDesc";
-    let filterStatus = "ALL";
-    let searchQuery = "";
+    let items = [], sortMode = "createdDesc", filterStatus = "ALL", searchQuery = "";
 
-    // ===== DOM =====
     const themeSelect = document.getElementById("themeSelect");
     const clearAllBtn = document.getElementById("clearAllBtn");
     const addBtn = document.getElementById("addBtn");
@@ -310,35 +278,48 @@
     const stickyHeader = document.querySelector('.sticky-header-container');
     const toastContainer = document.getElementById('toast-container');
 
-
-    // ===== 유틸리티 함수: 토스트 알림 표시 (새로 추가됨) =====
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        // 타입에 따른 아이콘 추가
         const icon = type === 'success' ? '✅' : '⚠️';
         toast.innerHTML = `<span>${icon}</span> ${message}`;
-        
         toastContainer.appendChild(toast);
-
-        // 3초 후 제거 애니메이션 및 삭제
         setTimeout(() => {
             toast.style.animation = 'toastFadeOut 0.3s ease-out forwards';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
 
-    // ===== 스크롤 감지하여 헤더 스타일 변경 (새로 추가됨) =====
+    // ===== ★ 핵심: 스마트 헤더 기능 추가 (스크롤 감지) =====
+    let lastScrollTop = 0;
+    const delta = 5; // 스크롤 감도
+
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 10) {
+        const st = window.scrollY;
+        
+        // 그림자 효과 (맨 위가 아니면 그림자 추가)
+        if (st > 10) {
             stickyHeader.classList.add('scrolled');
         } else {
             stickyHeader.classList.remove('scrolled');
         }
+
+        // 스크롤 방향 감지 및 헤더 숨김/표시
+        if (Math.abs(lastScrollTop - st) <= delta) return;
+
+        // 스크롤을 내리고 있고(st > lastScrollTop), 일정 이상 내려갔을 때(st > 50)
+        if (st > lastScrollTop && st > 50) {
+            // 아래로 스크롤 중 -> 헤더 숨김
+            stickyHeader.classList.add('nav-up');
+        } else {
+            // 위로 스크롤 중 -> 헤더 표시
+            stickyHeader.classList.remove('nav-up');
+        }
+        
+        lastScrollTop = st;
     });
 
-
-    // ===== 테마 처리 =====
+    // ===== 테마 및 기타 설정 =====
     function applyTheme(mode) {
       const root = document.documentElement;
       if (mode === "system") {
@@ -354,11 +335,9 @@
     applyTheme(storedTheme);
     themeSelect.addEventListener("change", (e) => applyTheme(e.target.value));
 
-    // ===== 스크롤 버튼 =====
     scrollTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
     scrollBottomBtn.addEventListener("click", () => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }));
 
-    // ===== 데이터 파싱 유틸 =====
     function getCreatedAtMs(item) {
       const v = item.createdAt;
       if (!v) return 0;
@@ -390,31 +369,25 @@
       return { season: null, episodeNum: null };
     }
 
-    // ===== Firestore 구독 =====
     onSnapshot(query(itemsCol, orderBy("createdAt", "asc")), (snapshot) => {
       items = [];
       snapshot.forEach((docSnap) => items.push({ id: docSnap.id, ...docSnap.data() }));
       render();
     });
 
-    // ===== 입력 이벤트 =====
     addBtn.addEventListener("click", async () => {
       const title = titleInput.value.trim();
-      if (!title) { showToast("작품 이름을 입력해주세요!", "error"); return; } // alert 대신 toast 사용
-
+      if (!title) { showToast("작품 이름을 입력해주세요!", "error"); return; }
       const episodeTextRaw = episodeInput.value.trim();
       const { season, episodeNum } = parseEpisodeInput(episodeTextRaw);
       const episodeText = episodeTextRaw || buildEpisodeText(season, episodeNum);
-
       await addDoc(itemsCol, {
         title, episodeText, seen: seenInput.value, memo: memoInput.value.trim(),
         season: season ?? null, episodeNum: episodeNum ?? null, createdAt: Date.now()
       });
-      
-      showToast(`'${title}' 추가 완료!`); // 성공 토스트 알림
-
-      titleInput.value = ""; episodeInput.value = ""; memoInput.value = ""; seenInput.value = "W"; // 기본값을 '보는중'으로 변경
-      titleInput.focus(); // 입력 후 다시 제목창에 포커스
+      showToast(`'${title}' 추가 완료!`);
+      titleInput.value = ""; episodeInput.value = ""; memoInput.value = ""; seenInput.value = "W";
+      titleInput.focus();
     });
 
     clearAllBtn.addEventListener("click", async () => {
@@ -428,131 +401,83 @@
     sortSelect.addEventListener("change", (e) => { sortMode = e.target.value; render(); });
     statusFilter.addEventListener("change", (e) => { filterStatus = e.target.value; render(); });
 
-    // ===== 렌더링 (디자인 대폭 수정됨) =====
-    const MAX_SEASON = 20; // 시즌 최대값 증가
-    const MAX_EPISODE = 200; // 회차 최대값 증가
+    const MAX_SEASON = 20;
+    const MAX_EPISODE = 200;
 
     function render() {
       grid.innerHTML = "";
       let display = items.map((item) => ({ ...item, seenNorm: normalizeSeen(item) }));
-
       if (searchQuery) display = display.filter((item) => (item.title || "").toLowerCase().includes(searchQuery));
       if (filterStatus !== "ALL") display = display.filter((item) => item.seenNorm === filterStatus);
-
       display.sort((a, b) => sortMode === "titleAsc" ? (a.title || "").localeCompare(b.title || "", "ko") : getCreatedAtMs(b) - getCreatedAtMs(a));
-
+      
       const countO = display.filter((i) => i.seenNorm === "O").length;
       const countW = display.filter((i) => i.seenNorm === "W").length;
       const countX = display.filter((i) => i.seenNorm === "X").length;
       statsSummary.innerHTML = `총 <b>${display.length}</b>작품 (완료 ${countO} · 시청중 ${countW} · 미시청 ${countX})`;
-
       emptyEl.style.display = display.length === 0 ? "block" : "none";
 
       display.forEach((item) => {
         const docRef = doc(db, "animeItems", item.id);
         const card = document.createElement("div"); card.className = "card";
-
-        // --- 상단: 제목 및 상태 ---
         const headerRow = document.createElement("div"); headerRow.className = "card-header-row";
-        
         const titleGroup = document.createElement("div"); titleGroup.className = "card-title-group";
         const titleEl = document.createElement("div"); titleEl.className = "card-title"; titleEl.textContent = item.title;
-        
-        // 회차 정보 표시 최적화
         let epLabel = item.episodeText;
         const builtFromNumbers = buildEpisodeText(item.season, item.episodeNum);
-        // 입력한 텍스트가 없고 숫자 정보만 있을 때, 또는 입력 텍스트와 숫자 정보가 다를 때 숫자 정보 우선 표시
-        if ((!epLabel && builtFromNumbers) || (builtFromNumbers && epLabel !== builtFromNumbers)) {
-             epLabel = builtFromNumbers;
-        }
+        if ((!epLabel && builtFromNumbers) || (builtFromNumbers && epLabel !== builtFromNumbers)) epLabel = builtFromNumbers;
         if (!epLabel) epLabel = "회차 정보 없음";
-
         const subtitleEl = document.createElement("div"); subtitleEl.className = "card-subtitle"; subtitleEl.textContent = epLabel;
         titleGroup.appendChild(titleEl); titleGroup.appendChild(subtitleEl);
-
         const chip = document.createElement("div");
         chip.className = `status-chip ${item.seenNorm === 'O' ? 'done' : item.seenNorm === 'W' ? 'watching' : 'not'}`;
         chip.innerHTML = item.seenNorm === 'O' ? '✅ 완료' : item.seenNorm === 'W' ? '👀 보는중' : '❌ 안봄';
-        
-        headerRow.appendChild(titleGroup);
-        headerRow.appendChild(chip);
+        headerRow.appendChild(titleGroup); headerRow.appendChild(chip);
 
-        // --- 중단: 컨트롤 (상태, 시즌, 회차) ---
         const controls = document.createElement("div"); controls.className = "card-controls";
-        
-        // 상태 선택
         const statusGroup = document.createElement("div"); statusGroup.className = "control-group";
         statusGroup.innerHTML = `<span class="control-label">상태</span>`;
         const statusSelect = document.createElement("select"); statusSelect.className = "wheel-select";
         statusSelect.innerHTML = `<option value="O" ${item.seenNorm==="O"?"selected":""}>완료</option><option value="W" ${item.seenNorm==="W"?"selected":""}>보는중</option><option value="X" ${item.seenNorm==="X"?"selected":""}>안봄</option>`;
-        statusSelect.addEventListener("change", async(e) => {
-             await updateDoc(docRef, { seen: e.target.value });
-             showToast("상태가 변경되었습니다.");
-        });
+        statusSelect.addEventListener("change", async(e) => { await updateDoc(docRef, { seen: e.target.value }); showToast("상태가 변경되었습니다."); });
         statusGroup.appendChild(statusSelect);
 
-        // 시즌/회차 선택 (그룹으로 묶음)
         const epGroup = document.createElement("div"); epGroup.className = "control-group";
-        // epGroup.innerHTML = `<span class="control-label">진도</span>`;
-
         const seasonSelect = document.createElement("select"); seasonSelect.className = "wheel-select";
         seasonSelect.innerHTML = `<option value="-">시즌</option>` + Array.from({length:MAX_SEASON},(_,i)=>`<option value="${i+1}">${i+1}기</option>`).join('');
         seasonSelect.value = item.season ?? "-";
-
         const episodeSelect = document.createElement("select"); episodeSelect.className = "wheel-select";
         episodeSelect.innerHTML = `<option value="-">회차</option>` + Array.from({length:MAX_EPISODE},(_,i)=>`<option value="${i+1}">${i+1}화</option>`).join('');
         episodeSelect.value = item.episodeNum ?? "-";
-
-        // 공통 업데이트 함수
         const updateEpInfo = async (newSeason, newEp) => {
             const newText = buildEpisodeText(newSeason, newEp);
             await updateDoc(docRef, { season: newSeason, episodeNum: newEp, episodeText: newText });
-            // showToast("회차 정보가 업데이트되었습니다."); // 너무 자주 떠서 주석 처리
         }
         seasonSelect.addEventListener("change", (e) => updateEpInfo(e.target.value==='-'?null:Number(e.target.value), episodeSelect.value==='-'?null:Number(episodeSelect.value)));
         episodeSelect.addEventListener("change", (e) => updateEpInfo(seasonSelect.value==='-'?null:Number(seasonSelect.value), e.target.value==='-'?null:Number(e.target.value)));
+        epGroup.appendChild(seasonSelect); epGroup.appendChild(episodeSelect);
 
-        epGroup.appendChild(seasonSelect);
-        epGroup.appendChild(episodeSelect);
-
-        // ★★★ [+1화 빠른 추가 버튼] - 핵심 기능 추가 ★★★
         const plusOneBtn = document.createElement("button");
-        plusOneBtn.className = "plus-one-btn";
-        plusOneBtn.title = "다음 화로 변경 (+1)";
-        plusOneBtn.textContent = "+1화";
+        plusOneBtn.className = "plus-one-btn"; plusOneBtn.textContent = "+1화";
         plusOneBtn.addEventListener("click", async () => {
-            let currentEp = item.episodeNum ?? 0; // 현재 회차가 없으면 0부터 시작
-            let nextEp = currentEp + 1;
-            // 상태도 '보는중'으로 자동 변경
-            await updateDoc(docRef, { 
-                episodeNum: nextEp, 
-                episodeText: buildEpisodeText(item.season, nextEp),
-                seen: 'W' 
-            });
+            let currentEp = item.episodeNum ?? 0; let nextEp = currentEp + 1;
+            await updateDoc(docRef, { episodeNum: nextEp, episodeText: buildEpisodeText(item.season, nextEp), seen: 'W' });
             showToast(`'${item.title}' ${nextEp}화로 업데이트!`, 'success');
         });
         epGroup.appendChild(plusOneBtn);
+        controls.appendChild(statusGroup); controls.appendChild(epGroup);
 
-
-        controls.appendChild(statusGroup);
-        controls.appendChild(epGroup);
-
-        // --- 메모 및 하단 ---
         const memoEl = document.createElement("textarea"); memoEl.className = "memo"; memoEl.placeholder = "메모를 입력하세요..."; memoEl.value = item.memo || "";
         memoEl.addEventListener("change", async(e) => { await updateDoc(docRef, { memo: e.target.value.trim() }); showToast("메모가 저장되었습니다."); });
 
         const footer = document.createElement("div"); footer.className = "card-footer";
         footer.textContent = getCreatedAtMs(item) ? new Date(getCreatedAtMs(item)).toLocaleDateString() + " 추가됨" : "";
-        
         const delBtn = document.createElement("button"); delBtn.className = "secondary danger small-btn";
         delBtn.innerHTML = `🗑️ 삭제`;
         delBtn.addEventListener("click", async() => { if(confirm("정말 삭제하시겠습니까?")) { await deleteDoc(docRef); showToast("삭제되었습니다.", "error"); }});
         footer.appendChild(delBtn);
 
-        card.appendChild(headerRow);
-        card.appendChild(controls);
-        card.appendChild(memoEl);
-        card.appendChild(footer);
+        card.appendChild(headerRow); card.appendChild(controls); card.appendChild(memoEl); card.appendChild(footer);
         grid.appendChild(card);
       });
     }
