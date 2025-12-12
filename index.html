@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>애니리스트</title>
+  <title>내 손안의 애니리스트</title>
   
   <link rel="apple-touch-icon" href="icon_512.png" />
   <link rel="icon" type="image/png" href="icon_512.png" />
 
   <style>
-    /* 디자인은 기존과 동일하게 예쁘게 유지 */
+    /* 디자인 스타일 (이전과 동일) */
     :root[data-theme="light"] {
       --bg-app: #f8fafc; --bg-surface: #ffffff; --bg-surface-alt: #f1f5f9;
       --text-primary: #1e293b; --text-secondary: #64748b;
@@ -31,7 +31,7 @@
     }
     .app { max-width: 600px; margin: 0 auto; padding: 20px 20px 80px 20px; }
 
-    /* 헤더 & 입력창 스타일 */
+    /* 헤더 & 입력창 */
     .sticky-header-container {
       position: sticky; top: 0; z-index: 100; background-color: var(--bg-app);
       padding: 10px 20px; margin: 0 -20px;
@@ -74,7 +74,7 @@
     .plus-one-btn { padding: 4px 8px !important; font-size: 11px !important; background: var(--bg-surface-alt); color: var(--accent-color); border: 1px solid var(--accent-color); }
     .del-btn { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; font-size: 11px; border-radius: 6px; margin-left: auto; }
 
-    /* 기타 */
+    /* 로딩 및 토스트 */
     .loader { border: 2px solid #f3f3f3; border-top: 2px solid var(--accent-color); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; margin-right: 5px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 300px; pointer-events: none; }
@@ -85,7 +85,7 @@
 
 <div class="app">
   <div class="sticky-header-container">
-    <h1>애니리스트 (무료버전)</h1>
+    <h1>애니리스트 (데이터 복구됨)</h1>
     
     <div class="input-row">
       <label for="fileInput" class="file-label">📷</label>
@@ -108,13 +108,14 @@
   </div>
 
   <section id="grid" class="grid"></section>
-  <div id="empty" style="text-align:center; padding:40px; color:gray; display:none;">작품을 추가해보세요!</div>
+  <div id="empty" style="text-align:center; padding:40px; color:gray; display:none;">
+    데이터가 없습니다.<br>(Firebase 콘솔에서 컬렉션 이름을 확인해보세요!)
+  </div>
 </div>
 
 <div id="toast-container"></div>
 
 <script type="module">
-  // ★★★ Storage 관련 코드를 다 삭제하고 Firestore만 남겼습니다 ★★★
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
   import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
@@ -129,23 +130,24 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const itemsCol = collection(db, "animeItems");
+  
+  // ★★★ 여기가 수정되었습니다! (animeItems -> animes) ★★★
+  // 예전에 쓰시던 폴더 이름이 'animes' 였습니다.
+  const itemsCol = collection(db, "animes");
 
-  // DOM 요소
+  // DOM
   const addBtn = document.getElementById("addBtn");
   const fileInput = document.getElementById("fileInput");
   const fileNameDisplay = document.getElementById("fileNameDisplay");
   const grid = document.getElementById("grid");
   const header = document.querySelector(".sticky-header-container");
 
-  // 토스트 메시지
   function showToast(msg) {
     const t = document.createElement("div"); t.className = "toast"; t.innerText = msg;
     document.getElementById("toast-container").appendChild(t);
     setTimeout(() => t.remove(), 2500);
   }
 
-  // 파일명 표시
   fileInput.addEventListener("change", (e) => {
     if(e.target.files[0]) {
         fileNameDisplay.textContent = e.target.files[0].name;
@@ -153,7 +155,7 @@
     }
   });
 
-  // ★★★ 핵심: 이미지를 압축해서 글자로 바꾸는 함수 ★★★
+  // 이미지 압축 (Base64)
   function compressImage(file) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -163,23 +165,19 @@
             img.src = event.target.result;
             img.onload = () => {
                 const canvas = document.createElement("canvas");
-                // 썸네일용으로 크기를 줄입니다 (최대 300px)
                 const MAX_WIDTH = 300;
                 const scaleSize = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
                 canvas.height = img.height * scaleSize;
-                
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
-                // 결과물을 글자(Base64)로 변환
                 resolve(canvas.toDataURL("image/jpeg", 0.7)); 
             }
         }
     });
   }
 
-  // 추가 버튼 로직
+  // 추가
   addBtn.addEventListener("click", async () => {
     const title = document.getElementById("titleInput").value.trim();
     if (!title) return showToast("제목을 입력하세요!");
@@ -189,8 +187,6 @@
 
     try {
         let imageUrl = "";
-        
-        // 사진이 있으면 압축해서 글자로 변환
         if (fileInput.files[0]) {
             imageUrl = await compressImage(fileInput.files[0]);
         }
@@ -200,13 +196,11 @@
             episodeText: document.getElementById("episodeInput").value.trim(), 
             seen: document.getElementById("seenInput").value, 
             memo: "",
-            imageUrl: imageUrl, // 글자로 변환된 이미지가 여기에 저장됨
+            imageUrl: imageUrl,
             createdAt: Date.now()
         });
 
         showToast("저장 완료!");
-        
-        // 초기화
         document.getElementById("titleInput").value = "";
         document.getElementById("episodeInput").value = "";
         fileInput.value = ""; 
@@ -214,32 +208,29 @@
 
     } catch (e) {
         console.error(e);
-        showToast("오류 발생 (사진이 너무 클 수도 있어요)");
+        showToast("오류 발생");
     } finally {
         addBtn.disabled = false;
         addBtn.innerText = "추가";
     }
   });
 
-  // 삭제 로직
   window.deleteItem = async (id) => {
     if(!confirm("삭제하시겠습니까?")) return;
-    await deleteDoc(doc(db, "animeItems", id));
+    await deleteDoc(doc(db, "animes", id)); // 여기도 animes로 자동 변경됨
     showToast("삭제됨");
   };
 
-  // +1 기능
   window.plusOne = async (id, text) => {
     let num = text.match(/\d+/g);
     if(num) {
         let lastNum = parseInt(num[num.length-1]);
         let newText = text.replace(lastNum, lastNum + 1);
-        await updateDoc(doc(db, "animeItems", id), { episodeText: newText, seen: 'W' });
+        await updateDoc(doc(db, "animes", id), { episodeText: newText, seen: 'W' });
         showToast("+1화 완료!");
     }
   };
 
-  // 렌더링
   onSnapshot(query(itemsCol, orderBy("createdAt", "desc")), (snap) => {
     let items = []; snap.forEach(d => items.push({id: d.id, ...d.data()}));
     
@@ -250,23 +241,28 @@
     items.forEach(item => {
         const div = document.createElement("div"); div.className = "card";
         
+        // 이미지 유무 확인
         const imgHtml = item.imageUrl 
             ? `<img src="${item.imageUrl}" class="card-thumb">`
             : `<div class="card-thumb" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:24px;">📺</div>`;
+
+        // 기존 데이터에는 seen, episodeText가 없을 수 있으므로 기본값 처리
+        const seenStatus = item.seen || 'W'; 
+        const epText = item.episodeText || '회차 정보 없음';
 
         div.innerHTML = `
             ${imgHtml}
             <div class="card-content">
                 <div style="display:flex; justify-content:space-between;">
                     <span class="card-title">${item.title}</span>
-                    <span style="font-size:11px; font-weight:bold; color:${item.seen==='O'?'green':item.seen==='W'?'orange':'gray'}">
-                        ${item.seen==='O'?'완료':item.seen==='W'?'보는중':'안봄'}
+                    <span style="font-size:11px; font-weight:bold; color:${seenStatus==='O'?'green':seenStatus==='W'?'orange':'gray'}">
+                        ${seenStatus==='O'?'완료':seenStatus==='W'?'보는중':'안봄'}
                     </span>
                 </div>
-                <div style="font-size:12px; color:gray;">${item.episodeText || '회차 정보 없음'}</div>
+                <div style="font-size:12px; color:gray;">${epText}</div>
                 
                 <div class="card-controls">
-                    <button class="plus-one-btn" onclick="plusOne('${item.id}', '${item.episodeText || ''}')">+1화</button>
+                    <button class="plus-one-btn" onclick="plusOne('${item.id}', '${epText}')">+1화</button>
                     <button class="del-btn" onclick="deleteItem('${item.id}')">삭제</button>
                 </div>
             </div>
@@ -275,7 +271,6 @@
     });
   });
 
-  // 헤더 스크롤 효과
   let lastScroll = 0;
   window.addEventListener("scroll", () => {
     const current = window.scrollY;
