@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>애니리스트</title>
+  <title>내 손안의 애니리스트</title>
 
   <link rel="apple-touch-icon" href="icon_512.png" />
   <link rel="icon" type="image/png" href="icon_512.png" />
@@ -25,6 +25,7 @@
       --error-bg: #fee2e2;   --error-text: #991b1b;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
     :root[data-theme="dark"] {
@@ -42,6 +43,7 @@
       --error-bg: #450a0a;   --error-text: #f87171;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
     }
 
     /* ===== 2. 기본 스타일 ===== */
@@ -109,22 +111,7 @@
     .toolbar-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
     .stats { font-size: 13px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; margin-left: auto; }
 
-    /* ===== ★ 사진 관련 스타일 추가 ★ ===== */
-    .file-label {
-      padding: 10px 14px; background: var(--bg-surface-alt); border: 1px solid var(--border-color);
-      border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      font-size: 18px; min-width: 50px; /* 버튼 크기 */
-    }
-    /* 카드 내부 레이아웃 (가로 정렬을 위해 추가) */
-    .card-body-row { display: flex; gap: 16px; width: 100%; }
-    .card-content-col { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-    /* 썸네일 이미지 스타일 */
-    .card-thumb {
-      width: 80px; height: 110px; border-radius: 12px; object-fit: cover; flex-shrink: 0;
-      background: var(--bg-surface-alt); border: 1px solid var(--border-color);
-    }
-
-    /* ===== 4. 리스트 & 카드 ===== */
+    /* ===== 4. 리스트 & 카드 (사진 관련 스타일 제거됨) ===== */
     .grid { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
     @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -132,7 +119,7 @@
       background: var(--bg-surface); border-radius: 20px; padding: 20px;
       box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
       animation: slideUpFade 0.3s ease-out forwards;
-      /* 기존 스타일 유지하되 flex 방향은 내부 div에서 제어 */
+      display: flex; flex-direction: column; gap: 16px; /* 세로 정렬로 복귀 */
     }
     .card-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
     .card-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
@@ -172,7 +159,6 @@
       .sticky-header-container { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px;}
       .input-row { flex-direction: column; }
       .input-row input, .input-row select, .input-row button { width: 100%; }
-      .file-label { width: 100%; } /* 모바일에서 사진 버튼 꽉 차게 */
       .toolbar { flex-direction: column; align-items: stretch; }
       .stats { margin-left: 0; text-align: center; margin-top: 8px; }
       .card-controls { flex-direction: column; align-items: stretch; }
@@ -197,9 +183,6 @@
 
         <section class="controls">
         <div class="input-row">
-            <label for="fileInput" class="file-label">📷</label>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;" />
-            
             <input id="titleInput" placeholder="작품 제목 (예: 최애의 아이)" />
         </div>
         
@@ -286,7 +269,6 @@
     const scrollBottomBtn = document.getElementById("scrollBottomBtn");
     const stickyHeader = document.querySelector('.sticky-header-container');
     const toastContainer = document.getElementById('toast-container');
-    const fileInput = document.getElementById("fileInput"); // 파일 입력
 
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
@@ -298,41 +280,6 @@
             toast.style.animation = 'toastFadeOut 0.3s ease-out forwards';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
-    }
-
-    // 파일 선택 시 버튼 스타일 변경 (선택됨 표시)
-    fileInput.addEventListener("change", (e) => {
-        const label = document.querySelector('.file-label');
-        if(e.target.files.length > 0) {
-            label.style.borderColor = "var(--accent-color)";
-            label.style.color = "var(--accent-color)";
-            showToast("사진이 선택되었습니다.");
-        } else {
-            label.style.borderColor = "var(--border-color)";
-            label.style.color = "var(--text-primary)";
-        }
-    });
-
-    // ===== ★ 핵심: 이미지 압축 함수 (무료 Base64 방식) =====
-    function compressImage(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (event) => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 300; // 썸네일용으로 크기 제한
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL("image/jpeg", 0.7)); 
-                }
-            }
-        });
     }
 
     // 스마트 헤더 로직
@@ -404,49 +351,24 @@
       render();
     });
 
-    // ===== 추가 버튼 로직 (사진 처리 포함) =====
+    // ===== 추가 버튼 로직 (사진 로직 제거됨) =====
     addBtn.addEventListener("click", async () => {
       const title = titleInput.value.trim();
       if (!title) { showToast("작품 이름을 입력해주세요!", "error"); return; }
 
-      // 로딩 표시
-      addBtn.disabled = true;
-      addBtn.innerHTML = `<span class="loader"></span>`;
+      const episodeTextRaw = episodeInput.value.trim();
+      const { season, episodeNum } = parseEpisodeInput(episodeTextRaw);
+      const episodeText = episodeTextRaw || buildEpisodeText(season, episodeNum);
+      
+      await addDoc(itemsCol, {
+          title, episodeText, seen: seenInput.value, memo: memoInput.value.trim(),
+          season: season ?? null, episodeNum: episodeNum ?? null, createdAt: Date.now()
+      });
 
-      try {
-        let imageUrl = "";
-        // 사진이 있으면 압축해서 변환
-        if (fileInput.files[0]) {
-            imageUrl = await compressImage(fileInput.files[0]);
-        }
-
-        const episodeTextRaw = episodeInput.value.trim();
-        const { season, episodeNum } = parseEpisodeInput(episodeTextRaw);
-        const episodeText = episodeTextRaw || buildEpisodeText(season, episodeNum);
-        
-        await addDoc(itemsCol, {
-            title, episodeText, seen: seenInput.value, memo: memoInput.value.trim(),
-            season: season ?? null, episodeNum: episodeNum ?? null, 
-            imageUrl: imageUrl, // 사진 데이터 저장
-            createdAt: Date.now()
-        });
-
-        showToast(`'${title}' 추가 완료!`);
-        
-        // 입력창 초기화
-        titleInput.value = ""; episodeInput.value = ""; memoInput.value = ""; seenInput.value = "W";
-        fileInput.value = ""; 
-        document.querySelector('.file-label').style.borderColor = "var(--border-color)"; // 버튼 스타일 초기화
-        document.querySelector('.file-label').style.color = "var(--text-primary)";
-        titleInput.focus();
-
-      } catch (e) {
-          console.error(e);
-          showToast("오류가 발생했습니다.", "error");
-      } finally {
-          addBtn.disabled = false;
-          addBtn.innerText = "+ 추가하기";
-      }
+      showToast(`'${title}' 추가 완료!`);
+      
+      titleInput.value = ""; episodeInput.value = ""; memoInput.value = ""; seenInput.value = "W";
+      titleInput.focus();
     });
 
     clearAllBtn.addEventListener("click", async () => {
@@ -463,7 +385,7 @@
     const MAX_SEASON = 20;
     const MAX_EPISODE = 200;
 
-    // ===== 렌더링 함수 (레이아웃 수정됨) =====
+    // ===== 렌더링 함수 (사진 로직 제거 및 레이아웃 복구) =====
     function render() {
       grid.innerHTML = "";
       let display = items.map((item) => ({ ...item, seenNorm: normalizeSeen(item) }));
@@ -480,26 +402,6 @@
       display.forEach((item) => {
         const docRef = doc(db, "animeItems", item.id);
         const card = document.createElement("div"); card.className = "card";
-        
-        // ★ Flex Row 생성 (이미지 | 내용)
-        const bodyRow = document.createElement("div"); 
-        bodyRow.className = "card-body-row";
-
-        // 1. 이미지가 있으면 추가
-        if(item.imageUrl) {
-            const img = document.createElement("img");
-            img.src = item.imageUrl;
-            img.className = "card-thumb";
-            img.onclick = () => { // 이미지 클릭 시 새창 보기
-                const w = window.open("");
-                w.document.write(`<img src="${item.imageUrl}" style="max-width:100%">`);
-            };
-            bodyRow.appendChild(img);
-        }
-
-        // 2. 나머지 내용 (Content Column)
-        const contentCol = document.createElement("div");
-        contentCol.className = "card-content-col";
 
         // --- Header ---
         const headerRow = document.createElement("div"); headerRow.className = "card-header-row";
@@ -566,13 +468,10 @@
         footer.appendChild(delBtn);
 
         // 구조 조립
-        contentCol.appendChild(headerRow);
-        contentCol.appendChild(controls);
-        contentCol.appendChild(memoEl);
-        contentCol.appendChild(footer);
-
-        bodyRow.appendChild(contentCol);
-        card.appendChild(bodyRow);
+        card.appendChild(headerRow);
+        card.appendChild(controls);
+        card.appendChild(memoEl);
+        card.appendChild(footer);
         grid.appendChild(card);
       });
     }
