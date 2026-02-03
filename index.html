@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        /* 🎨 디자인 스타일 (다크모드 & 핑크 포인트) */
+        /* 🎨 디자인 스타일 */
         :root {
             --bg-color: #000000;
             --card-bg: #1C1C1E;
@@ -16,6 +16,7 @@
             --text-secondary: #8E8E93;
             --accent-pink: #FF6482;
             --search-bg: #2C2C2E;
+            --btn-bg: #3A3A3C;
         }
 
         body {
@@ -32,15 +33,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             padding-top: 20px;
         }
 
-        h1 {
-            font-size: 28px;
-            font-weight: 800;
-            margin: 0;
-        }
+        h1 { font-size: 28px; font-weight: 800; margin: 0; }
 
         /* 검색창 */
         .search-bar {
@@ -49,25 +46,39 @@
             padding: 8px 12px;
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+        }
+        .search-bar input {
+            background: transparent; border: none; color: white; font-size: 16px; width: 100%; outline: none; margin-left: 8px;
         }
 
-        .search-bar input {
-            background: transparent;
+        /* 🟢 필터 탭 (상태별 보기) */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .filter-btn {
+            background: var(--btn-bg);
             border: none;
-            color: white;
-            font-size: 16px;
-            width: 100%;
-            outline: none;
-            margin-left: 8px;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn.active {
+            background: var(--text-primary);
+            color: black;
         }
 
         /* 리스트 영역 */
-        #anime-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        #anime-list { display: flex; flex-direction: column; gap: 12px; }
 
         /* 카드 디자인 */
         .card {
@@ -75,13 +86,13 @@
             border-radius: 14px;
             padding: 12px;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             position: relative;
         }
 
         .poster {
-            width: 70px;
-            height: 100px;
+            width: 80px;
+            height: 110px;
             border-radius: 8px;
             object-fit: cover;
             background-color: #333;
@@ -94,150 +105,111 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 90px;
+            min-height: 110px;
         }
 
         .header-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            margin-bottom: 8px;
         }
 
         .title {
             font-size: 17px;
             font-weight: 700;
             line-height: 1.3;
-            margin-bottom: 4px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            margin-right: 8px;
             color: var(--text-primary);
+            word-break: keep-all;
         }
 
-        .status-badge {
+        /* 상태 선택 셀렉트 박스 */
+        .status-select {
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 2px;
             font-size: 12px;
             font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 6px;
-            background: #333;
-            color: #ddd;
-            flex-shrink: 0;
-            margin-left: 8px;
+            text-align: center;
+            outline: none;
+            cursor: pointer;
         }
 
-        .meta {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 500;
+        /* 🟢 시즌/화수 조절 컨트롤러 */
+        .control-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: auto;
         }
-
-        /* 핑크색 다음화 버튼 */
-        .next-btn {
-            background-color: var(--accent-pink);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 6px 14px;
-            font-size: 13px;
-            font-weight: 700;
+        
+        .stepper {
             display: flex;
             align-items: center;
-            gap: 4px;
-            width: fit-content;
-            cursor: pointer;
-            margin-top: auto;
-            box-shadow: 0 2px 8px rgba(255, 100, 130, 0.3);
-            transition: transform 0.1s;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 2px;
+            justify-content: space-between;
         }
-        .next-btn:active { transform: scale(0.95); }
+        
+        .stepper-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .stepper-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .stepper-btn:active { background: rgba(255,255,255,0.2); }
+        .plus-btn { color: var(--accent-pink); }
 
         /* 삭제 버튼 */
         .delete-btn {
             position: absolute;
-            bottom: 12px;
-            right: 12px;
+            bottom: -5px;
+            right: -5px;
             background: none;
             border: none;
-            color: #555;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 5px;
+            font-size: 12px;
+            padding: 10px;
+            opacity: 0.3;
         }
 
-        /* 플로팅 추가 버튼 (+) */
+        /* 플로팅 추가 버튼 */
         .fab {
-            position: fixed;
-            bottom: 30px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            background-color: var(--text-primary);
-            color: black;
-            border-radius: 50%;
-            font-size: 30px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(255,255,255,0.2);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
+            position: fixed; bottom: 30px; right: 20px; width: 56px; height: 56px;
+            background-color: var(--text-primary); color: black; border-radius: 50%;
+            font-size: 30px; border: none; box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+            cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100;
         }
 
-        /* 모달 (팝업) 스타일 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: #2C2C2E;
-            padding: 24px;
-            border-radius: 18px;
-            width: 80%;
-            max-width: 320px;
-        }
-
+        /* 모달 스타일 */
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #2C2C2E; padding: 24px; border-radius: 18px; width: 85%; max-width: 320px; }
         .modal h2 { margin-top: 0; color: white; margin-bottom: 20px; }
-        
         .input-group { margin-bottom: 16px; }
         .input-group label { display: block; color: #8E8E93; font-size: 13px; margin-bottom: 6px; }
-        .input-group input {
-            width: 100%;
-            background: #1C1C1E;
-            border: 1px solid #38383A;
-            padding: 12px;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 24px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
+        .input-group input, .input-group select { width: 100%; background: #1C1C1E; border: 1px solid #38383A; padding: 12px; border-radius: 10px; color: white; font-size: 16px; box-sizing: border-box; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+        .btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; }
         .btn-cancel { background: #3a3a3c; color: white; }
         .btn-save { background: var(--accent-pink); color: white; }
-
     </style>
 </head>
 <body>
@@ -248,13 +220,19 @@
 
     <div class="search-bar">
         <span>🔍</span>
-        <input type="text" id="searchInput" placeholder="제목으로 검색..." oninput="filterList()">
+        <input type="text" id="searchInput" placeholder="제목으로 검색..." oninput="renderFilteredList()">
+    </div>
+
+    <div class="filter-tabs">
+        <button class="filter-btn active" onclick="setFilter('all', this)">전체</button>
+        <button class="filter-btn" onclick="setFilter('watching', this)">👀 보는중</button>
+        <button class="filter-btn" onclick="setFilter('completed', this)">✅ 완료</button>
+        <button class="filter-btn" onclick="setFilter('not_started', this)">❌ 안봄</button>
     </div>
 
     <div id="anime-list">
         <div style="text-align:center; color:#555; margin-top:50px;">
-            데이터를 불러오고 있습니다...<br>
-            (잠시만 기다려주세요)
+            데이터 로딩 중...
         </div>
     </div>
 
@@ -263,15 +241,22 @@
     <div id="modal" class="modal">
         <div class="modal-content">
             <h2>새 작품 추가</h2>
-            
             <div class="input-group">
                 <label>이미지 주소 (URL)</label>
-                <input type="text" id="input-image" placeholder="이미지 주소를 붙여넣으세요">
+                <input type="text" id="input-image" placeholder="이미지 주소 붙여넣기">
             </div>
-
             <div class="input-group">
                 <label>제목</label>
                 <input type="text" id="input-title" placeholder="예: 최애의 아이">
+            </div>
+            
+            <div class="input-group">
+                <label>상태</label>
+                <select id="input-status">
+                    <option value="watching">👀 보는중</option>
+                    <option value="completed">✅ 완료</option>
+                    <option value="not_started">❌ 안봄</option>
+                </select>
             </div>
 
             <div style="display: flex; gap: 10px;">
@@ -284,7 +269,6 @@
                     <input type="number" id="input-episode" value="1">
                 </div>
             </div>
-
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="closeModal()">취소</button>
                 <button class="btn btn-save" onclick="addAnime()">추가</button>
@@ -296,11 +280,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // ✅ 성환 님의 설정 (databaseURL 자동 추가됨)
         const firebaseConfig = {
             apiKey: "AIzaSyDbPab8RoQ9IuNlDtLrby49qzPon4SQaWE",
             authDomain: "anime-list-85c9e.firebaseapp.com",
-            // 👇 프로젝트 ID를 기반으로 주소를 자동 완성해 넣었습니다!
             databaseURL: "https://anime-list-85c9e-default-rtdb.firebaseio.com",
             projectId: "anime-list-85c9e",
             storageBucket: "anime-list-85c9e.firebasestorage.app",
@@ -308,108 +290,141 @@
             appId: "1:397442939652:web:1b56e30cbbf8a573d86e51"
         };
 
-        // Firebase 시작
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const dbRef = ref(db, 'myAnimeList'); // 데이터 저장 위치
+        const dbRef = ref(db, 'myAnimeList');
 
-        let animeData = []; // 검색 기능을 위해 데이터 임시 저장
+        let allAnimeData = [];
+        let currentFilter = 'all';
 
-        // 🔄 [실시간 감지] 데이터가 바뀌면 화면을 다시 그립니다.
+        // 데이터 감지
         onValue(dbRef, (snapshot) => {
             const data = snapshot.val();
-            const list = document.getElementById('anime-list');
-            list.innerHTML = ''; // 화면 초기화
-
             if (!data) {
-                list.innerHTML = '<div style="text-align:center; color:#555; margin-top:50px;">목록이 비어있습니다.<br>+ 버튼을 눌러 추가해보세요!</div>';
-                animeData = [];
-                return;
+                allAnimeData = [];
+            } else {
+                allAnimeData = Object.entries(data).map(([key, value]) => ({ ...value, id: key }));
             }
-
-            // Firebase 데이터를 쓰기 좋게 변환
-            animeData = Object.entries(data).map(([key, value]) => ({ ...value, id: key }));
-            
-            // 화면 그리기
-            renderList(animeData);
+            renderFilteredList();
         });
 
-        // 🎨 화면 그리기 함수
-        window.renderList = function(list) {
+        // 🟢 전역 함수로 등록 (HTML에서 호출하기 위해 window에 연결)
+        window.setFilter = function(filterType, btnElement) {
+            currentFilter = filterType;
+            
+            // 버튼 스타일 변경
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            
+            renderFilteredList();
+        }
+
+        window.renderFilteredList = function() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
             const container = document.getElementById('anime-list');
             container.innerHTML = '';
+
+            // 1. 검색어 필터링
+            let filtered = allAnimeData.filter(item => item.title.toLowerCase().includes(query));
+
+            // 2. 상태(탭) 필터링
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(item => item.status === currentFilter);
+            }
+
+            // 정렬 (최신순)
+            filtered.sort((a, b) => b.createdAt - a.createdAt);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#555; margin-top:50px;">해당하는 작품이 없습니다.</div>';
+                return;
+            }
             
-            list.forEach((item) => {
+            filtered.forEach((item) => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <img src="${item.image || 'https://via.placeholder.com/70x100?text=No+Img'}" class="poster" onerror="this.src='https://via.placeholder.com/70x100?text=Error'">
+                    <img src="${item.image || 'https://via.placeholder.com/80x110?text=No+Img'}" class="poster" onerror="this.src='https://via.placeholder.com/80x110?text=Error'">
+                    
                     <div class="info">
                         <div class="header-row">
                             <div class="title">${item.title}</div>
-                            <span class="status-badge">보는 중</span>
+                            
+                            <select class="status-select" onchange="updateStatus('${item.id}', this.value)" style="background:${getStatusColor(item.status)}">
+                                <option value="watching" ${item.status === 'watching' ? 'selected' : ''}>보는중</option>
+                                <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>완료</option>
+                                <option value="not_started" ${item.status === 'not_started' ? 'selected' : ''}>안봄</option>
+                            </select>
                         </div>
-                        <div class="meta">${item.season}기 ${item.episode}화</div>
                         
-                        <button class="next-btn" onclick="nextEpisode('${item.id}', ${item.episode})">
-                            ▶ 다음화
-                        </button>
+                        <div class="control-row">
+                            <div class="stepper">
+                                <button class="stepper-btn" onclick="updateSeason('${item.id}', ${item.season - 1})">−</button>
+                                <span class="stepper-label">${item.season}기</span>
+                                <button class="stepper-btn" onclick="updateSeason('${item.id}', ${item.season + 1})">+</button>
+                            </div>
+                            <div class="stepper">
+                                <button class="stepper-btn" onclick="updateEpisode('${item.id}', ${item.episode - 1})">−</button>
+                                <span class="stepper-label">${item.episode}화</span>
+                                <button class="stepper-btn plus-btn" onclick="updateEpisode('${item.id}', ${item.episode + 1})">+</button>
+                            </div>
+                        </div>
                     </div>
-                    <button class="delete-btn" onclick="deleteItem('${item.id}')">🗑️</button>
+                    
+                    <button class="delete-btn" onclick="deleteItem('${item.id}')">🗑️ 삭제</button>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // ➕ 추가하기
+        function getStatusColor(status) {
+            if (status === 'completed') return '#34C759'; // 초록
+            if (status === 'not_started') return '#FF3B30'; // 빨강
+            return '#333'; // 기본(보는중)
+        }
+
+        // ➕ 추가
         window.addAnime = function() {
             const title = document.getElementById('input-title').value;
             const season = parseInt(document.getElementById('input-season').value) || 1;
             const episode = parseInt(document.getElementById('input-episode').value) || 1;
             const image = document.getElementById('input-image').value;
+            const status = document.getElementById('input-status').value;
 
             if (!title) { alert('제목을 입력해주세요!'); return; }
 
-            // Firebase에 데이터 전송 (push)
-            const newPostRef = push(dbRef);
-            set(newPostRef, {
-                title: title,
-                season: season,
-                episode: episode,
-                image: image,
-                createdAt: Date.now()
+            push(dbRef, {
+                title, season, episode, image, status, createdAt: Date.now()
             });
 
             closeModal();
-            // 입력창 비우기
             document.getElementById('input-title').value = '';
             document.getElementById('input-image').value = '';
             document.getElementById('input-season').value = '1';
             document.getElementById('input-episode').value = '1';
         }
 
-        // ▶ 다음화 (+1)
-        window.nextEpisode = function(id, currentEp) {
-            update(ref(db, 'myAnimeList/' + id), {
-                episode: currentEp + 1
-            });
+        // 🔄 업데이트 함수들
+        window.updateSeason = function(id, newVal) {
+            if (newVal < 0) return; // 0 미만 방지
+            update(ref(db, 'myAnimeList/' + id), { season: newVal });
         }
 
-        // 🗑 삭제하기
+        window.updateEpisode = function(id, newVal) {
+            if (newVal < 0) return; // 0 미만 방지
+            update(ref(db, 'myAnimeList/' + id), { episode: newVal });
+        }
+
+        window.updateStatus = function(id, newStatus) {
+            update(ref(db, 'myAnimeList/' + id), { status: newStatus });
+        }
+
         window.deleteItem = function(id) {
             if(confirm('정말 삭제하시겠습니까?')) {
                 remove(ref(db, 'myAnimeList/' + id));
             }
         }
 
-        // 🔍 검색 필터
-        window.filterList = function() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = animeData.filter(item => item.title.toLowerCase().includes(query));
-            renderList(filtered);
-        }
-
-        // 모달창 열고 닫기
         window.openModal = function() { document.getElementById('modal').style.display = 'flex'; }
         window.closeModal = function() { document.getElementById('modal').style.display = 'none'; }
     </script>
